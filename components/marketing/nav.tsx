@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ShoppingBag } from "lucide-react";
-import React from "react";
 
 export function Nav() {
   return (
