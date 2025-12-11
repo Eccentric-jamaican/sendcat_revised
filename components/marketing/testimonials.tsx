@@ -102,18 +102,22 @@ export function Testimonials() {
         {/* Row 1 - Scroll Left */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
           <div className="flex animate-scroll-left gap-4 px-4 hover:[animation-play-state:paused]">
-            {[...testimonialsRow1, ...testimonialsRow1, ...testimonialsRow1].map((testimonial, idx) => (
-              <TestimonialCard key={`row1-${idx}`} testimonial={testimonial} />
-            ))}
+            {[0, 1, 2].flatMap((copyIndex) =>
+              testimonialsRow1.map((testimonial, itemIndex) => (
+                <TestimonialCard key={`row1-copy${copyIndex}-item${itemIndex}`} testimonial={testimonial} />
+              ))
+            )}
           </div>
         </div>
 
         {/* Row 2 - Scroll Right */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
           <div className="flex animate-scroll-right gap-4 px-4 hover:[animation-play-state:paused]">
-             {[...testimonialsRow2, ...testimonialsRow2, ...testimonialsRow2].map((testimonial, idx) => (
-              <TestimonialCard key={`row2-${idx}`} testimonial={testimonial} />
-            ))}
+            {[0, 1, 2].flatMap((copyIndex) =>
+              testimonialsRow2.map((testimonial, itemIndex) => (
+                <TestimonialCard key={`row2-copy${copyIndex}-item${itemIndex}`} testimonial={testimonial} />
+              ))
+            )}
           </div>
         </div>
       </div>
