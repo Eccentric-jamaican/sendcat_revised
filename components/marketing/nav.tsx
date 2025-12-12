@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
 export function Nav() {
   return (
@@ -27,14 +28,32 @@ export function Nav() {
           </Link>
         </div>
 
-        {/* CTA Button */}
-        <Button
-          asChild
-          variant="secondary"
-          className="rounded-full bg-white px-6 font-medium text-black hover:bg-zinc-200"
-        >
-          <Link href="/app">Start Shopping</Link>
-        </Button>
+        {/* Auth + CTA */}
+        <div className="flex items-center gap-2">
+          <SignedOut>
+            <SignInButton>
+              <Button variant="ghost" className="rounded-full text-white hover:bg-white/10">
+                Sign in
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button variant="ghost" className="rounded-full text-white hover:bg-white/10">
+                Sign up
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+
+          <Button
+            asChild
+            variant="secondary"
+            className="rounded-full bg-white px-6 font-medium text-black hover:bg-zinc-200"
+          >
+            <Link href="/app">Start Shopping</Link>
+          </Button>
+        </div>
       </div>
     </nav>
   );

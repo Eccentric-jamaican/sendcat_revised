@@ -1,0 +1,63 @@
+---
+alwaysApply: false
+---
+---
+trigger: always_on
+---
+
+1.  **Default to Vertical Stacking:**
+    * Always start with `flex flex-col` for containers.
+    * Only switch to `flex-row` using responsive prefixes (e.g., `md:flex-row`) for desktop layouts.
+
+2.  **Mobile-First Classes:**
+    * NEVER write desktop styles as the default.
+    * WRONG: `<div class="w-[500px]">`
+    * CORRECT: `<div class="w-full max-w-md">`
+    * Use standard padding: `p-4` (mobile) -> `md:p-8` (desktop).
+
+3.  **Touch Targets (Crucial):**
+    * All interactive elements (buttons, inputs, links) must be at least 44px high.
+    * Use `min-h-[44px]` or `h-12` for buttons.
+    * Ensure generous spacing (`gap-4` or `gap-6`) so users don't misclick.
+
+4.  **Typography Scaling:**
+    * Use readable base sizes.
+    * H1: `text-3xl font-bold md:text-5xl`
+    * Body: `text-base md:text-lg`
+    * Avoid text that is too small (< 14px) on mobile.
+
+5.  **Navigation:**
+    * Default to a Hamburger menu/Drawer/Sheet for navigation.
+    * Only show a horizontal link bar on `lg:` screens.
+
+6.  **Images:**
+    * Always include `w-full h-auto object-cover` to prevent overflow issues on small screens.
+
+When I ask for a component, generate the Mobile view code primarily.
+
+
+6. **STRICT Typography Rules (Fluid Scale):**
+   * We are using a custom "Fluid Type" system in tailwind.config.
+   * NEVER use: text-4xl, text-5xl, text-xl (unless for icons).
+   * ALWAYS use semantic classes for text:
+       - Hero/Main Title: `class="text-h1 font-bold leading-tight"`
+       - Section Headers: `class="text-h2 font-semibold leading-tight"`
+       - Card Titles: `class="text-h3 font-medium"`
+       - Body Paragraphs: `class="text-body leading-relaxed text-muted-foreground"`
+       - Captions/Meta: `class="text-sm-fluid text-muted-foreground"`
+
+maintain mobile responsiveness by:
+
+Using TailwindCSS utility classes for responsive design, leveraging its built-in breakpoints (e.g., sm:, md:, lg:, xl:) to adjust layouts and styles for different screen sizes.
+
+Components and sections were structured with responsive flexbox, grid, and width classes, ensuring elements stacked, resized, or shifted correctly on mobile.
+
+Images and assets used the object-cover and width/height constraints, so they scaled well across devices.
+
+Often wrap key sections and UI elements inside containers with responsive padding and margin settings.
+
+Any animated elements (handled by GSAP) were given breakpoints to control their motion or presence based on device width.
+
+The main components are built using shadcn ui primitives if a component is not found in the ui folder install it using bun install @shadcn/ui add {component name}.
+
+package manager is bun
