@@ -28,14 +28,13 @@ export function Nav() {
         </div>
 
         {/* CTA Button */}
-        <Link href="/app" className="rounded-full">
-          <Button
-            variant="secondary"
-            className="rounded-full bg-white px-6 font-medium text-black hover:bg-zinc-200"
-          >
-            Start Shopping
-          </Button>
-        </Link>
+        <Button
+          asChild
+          variant="secondary"
+          className="rounded-full bg-white px-6 font-medium text-black hover:bg-zinc-200"
+        >
+          <Link href="/app">Start Shopping</Link>
+        </Button>
       </div>
     </nav>
   );

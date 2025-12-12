@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, Plane, Home } from "lucide-react";
+import { Search, Plane, Home } from "lucide-react";
 
 export function HowItWorks() {
   return (
@@ -27,7 +27,7 @@ export function HowItWorks() {
                        <span>Search query</span>
                    </div>
                    <div className="h-10 w-full rounded-lg border border-white/10 bg-black/50 flex items-center px-3 text-sm text-zinc-300">
-                       "Men's running shoes..."
+                       &ldquo;Men&rsquo;s running shoes...&rdquo;
                    </div>
                    <div className="h-2 w-1/2 bg-zinc-800 rounded-full"></div>
                    <div className="h-2 w-3/4 bg-zinc-800 rounded-full"></div>
@@ -37,7 +37,7 @@ export function HowItWorks() {
           <div className="space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Step 1: Ask SendCat</h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Tell our AI what you're looking for. It searches eBay and major US stores to find the best deals for you.
+              Tell our AI what you&apos;re looking for. It searches eBay and major US stores to find the best deals for you.
             </p>
           </div>
         </div>
