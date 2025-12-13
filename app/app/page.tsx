@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -56,6 +56,14 @@ function ExploreWithConvex() {
     { name: "depop", label: "Depop" },
   ]
 
+  const defaultQueries: Record<string, string> = {
+    amazon: "best selling electronics",
+    walmart: "home essentials",
+    ebay: "electronics deals",
+    shein: "new arrival fashion",
+    depop: "vintage clothing",
+  };
+
   const [selectedSource, setSelectedSource] = useState<string>("ebay");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultItem[]>([]);
@@ -85,7 +93,8 @@ function ExploreWithConvex() {
   async function runSearch(opts?: { source?: string; overrideQuery?: string }) {
     const sourceToUse = opts?.source ?? selectedSource;
     const rawQuery = opts?.overrideQuery ?? query;
-    const q = rawQuery.trim() || sourceToUse;
+    const fallback = defaultQueries[sourceToUse] ?? "popular products";
+    const q = rawQuery.trim() || fallback;
     if (!q) return;
 
     setIsSearching(true);
@@ -103,6 +112,11 @@ function ExploreWithConvex() {
       setIsSearching(false);
     }
   }
+
+  useEffect(() => {
+    void runSearch({ source: selectedSource });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">

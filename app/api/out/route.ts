@@ -30,3 +30,4 @@ export async function GET(req: Request) {
   // TODO: log outbound click as a Convex event (sessionId + optional Clerk identity).
   return NextResponse.redirect(parsed.toString(), 302);
 }
+
