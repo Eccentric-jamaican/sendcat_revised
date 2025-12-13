@@ -51,9 +51,14 @@ export async function searchEbayBrowse(params: {
 
     if (!itemId || !title || !price?.value) continue;
 
-    const value = Number(price.value);
+    const rawValue = price.value.trim();
+    const value = Number(rawValue);
     const currency = price.currency as string | undefined;
     // Prefer USD in the API; if not USD, we still store cents as numeric with currency recorded.
+    if (Number.isNaN(value)) {
+      console.warn(`eBay returned invalid price value for item ${itemId}: ${price.value}`);
+      continue;
+    }
     const priceUsdCents = Math.round(value * 100);
 
     const imageUrl = s.image?.imageUrl as string | undefined;
@@ -71,5 +76,3 @@ export async function searchEbayBrowse(params: {
 
   return items;
 }
-
-

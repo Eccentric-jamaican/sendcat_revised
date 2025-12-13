@@ -8,12 +8,14 @@
  * @module
  */
 
-import type * as events from "../events.js";
-import type * as items from "../items.js";
+import type * as actions_search from "../actions/search.js";
 import type * as lib_ebayBrowse from "../lib/ebayBrowse.js";
-import type * as search from "../search.js";
-import type * as searchCache from "../searchCache.js";
-import type * as trending from "../trending.js";
+import type * as mutations_events from "../mutations/events.js";
+import type * as mutations_items from "../mutations/items.js";
+import type * as mutations_searchCache from "../mutations/searchCache.js";
+import type * as queries_items from "../queries/items.js";
+import type * as queries_searchCache from "../queries/searchCache.js";
+import type * as queries_trending from "../queries/trending.js";
 
 import type {
   ApiFromModules,
@@ -22,12 +24,14 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  events: typeof events;
-  items: typeof items;
+  "actions/search": typeof actions_search;
   "lib/ebayBrowse": typeof lib_ebayBrowse;
-  search: typeof search;
-  searchCache: typeof searchCache;
-  trending: typeof trending;
+  "mutations/events": typeof mutations_events;
+  "mutations/items": typeof mutations_items;
+  "mutations/searchCache": typeof mutations_searchCache;
+  "queries/items": typeof queries_items;
+  "queries/searchCache": typeof queries_searchCache;
+  "queries/trending": typeof queries_trending;
 }>;
 
 /**

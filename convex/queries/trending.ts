@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 export const getTrendingItems = query({
@@ -27,7 +27,11 @@ export const getTrendingItems = query({
     if (!source) {
       // Generic fallback: show most recently seen items (across all sources).
       // This is intentionally simple for MVP; later we’ll compute weighted events.
-      return await ctx.db.query("items").order("desc").take(limit);
+      return await ctx.db
+        .query("items")
+        .withIndex("by_lastSeenAt")
+        .order("desc")
+        .take(limit);
     }
 
     return await ctx.db
@@ -37,5 +41,3 @@ export const getTrendingItems = query({
       .take(limit);
   },
 });
-
-

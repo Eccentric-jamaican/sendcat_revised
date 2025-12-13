@@ -70,8 +70,8 @@ function ExploreWithConvex() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const searchSource = useAction(api.search.searchSource);
-  const trending = useQuery(api.trending.getTrendingItems, {
+  const searchSource = useAction(api.actions.search.searchSource);
+  const trending = useQuery(api.queries.trending.getTrendingItems, {
     source: selectedSource,
     limit: 12,
   }) as unknown as TrendingItem[] | undefined;

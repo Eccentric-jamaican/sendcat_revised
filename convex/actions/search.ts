@@ -1,11 +1,11 @@
 "use node";
 
-import { action } from "./_generated/server";
+import { action } from "../_generated/server";
 import type { GenericActionCtx } from "convex/server";
-import type { DataModel, Doc, Id } from "./_generated/dataModel";
+import type { DataModel, Doc, Id } from "../_generated/dataModel";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
-import { searchEbayBrowse } from "./lib/ebayBrowse";
+import { api } from "../_generated/api";
+import { searchEbayBrowse } from "../lib/ebayBrowse";
 import crypto from "node:crypto";
 
 type TokenCache = { token: string; expiresAtMs: number };
@@ -93,13 +93,13 @@ export const searchSource = action({
     const limit = Math.max(1, Math.min(50, Math.floor(args.limit ?? 20)));
 
     const key = cacheKeyFor({ source, query: args.query, filters: args.filters });
-    const cached = (await ctx.runQuery(api.searchCache.getSearchCache, {
+    const cached = (await ctx.runQuery(api.queries.searchCache.getSearchCache, {
       key,
       now,
     })) as SearchCacheResult;
 
     if (cached?.itemIds?.length) {
-      const items = (await ctx.runQuery(api.items.getManyItems, {
+      const items = (await ctx.runQuery(api.queries.items.getManyItems, {
         itemIds: cached.itemIds,
       })) as ItemDoc[];
 
@@ -122,7 +122,7 @@ export const searchSource = action({
     const accessToken = await getEbayAccessToken();
     const ebayItems = await searchEbayBrowse({ accessToken, query: args.query, limit });
 
-    const upsertIds = (await ctx.runMutation(api.items.upsertManyItems, {
+    const upsertIds = (await ctx.runMutation(api.mutations.items.upsertManyItems, {
       items: ebayItems.map((i) => ({
         source,
         externalId: i.externalId,
@@ -136,7 +136,7 @@ export const searchSource = action({
     })) as Id<"items">[];
 
     // Cache search results for 20 minutes (tunable).
-    await ctx.runMutation(api.searchCache.setSearchCache, {
+    await ctx.runMutation(api.mutations.searchCache.setSearchCache, {
       key,
       source,
       query: args.query,
@@ -146,7 +146,7 @@ export const searchSource = action({
       ttlSeconds: 20 * 60,
     });
 
-    const items = (await ctx.runQuery(api.items.getManyItems, {
+    const items = (await ctx.runQuery(api.queries.items.getManyItems, {
       itemIds: upsertIds,
     })) as ItemDoc[];
 
@@ -162,4 +162,3 @@ export const searchSource = action({
     }));
   },
 });
-
