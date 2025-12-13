@@ -9,10 +9,22 @@ import { searchEbayBrowse } from "../lib/ebayBrowse";
 import crypto from "node:crypto";
 
 type TokenCache = { token: string; expiresAtMs: number };
+type SearchFilters = {
+  minPriceUsd?: number;
+  maxPriceUsd?: number;
+  condition?: "new" | "used" | "refurbished";
+  buyingFormat?: "fixedPrice" | "auction";
+  sort?: "bestMatch" | "priceAsc" | "priceDesc" | "newlyListed";
+  freeShippingOnly?: boolean;
+  returnsAcceptedOnly?: boolean;
+  itemLocationCountry?: string;
+  brand?: string;
+  categoryId?: string;
+};
 type SearchSourceArgs = {
   source: string;
   query: string;
-  filters?: unknown;
+  filters?: SearchFilters;
   limit?: number;
 };
 type SearchActionCtx = GenericActionCtx<DataModel>;
@@ -72,7 +84,22 @@ export const searchSource = action({
   args: {
     source: v.string(), // MVP: "ebay"
     query: v.string(),
-    filters: v.optional(v.any()),
+    filters: v.optional(
+      v.object({
+        minPriceUsd: v.optional(v.number()),
+        maxPriceUsd: v.optional(v.number()),
+        condition: v.optional(v.union(v.literal("new"), v.literal("used"), v.literal("refurbished"))),
+        buyingFormat: v.optional(v.union(v.literal("fixedPrice"), v.literal("auction"))),
+        sort: v.optional(
+          v.union(v.literal("bestMatch"), v.literal("priceAsc"), v.literal("priceDesc"), v.literal("newlyListed")),
+        ),
+        freeShippingOnly: v.optional(v.boolean()),
+        returnsAcceptedOnly: v.optional(v.boolean()),
+        itemLocationCountry: v.optional(v.string()),
+        brand: v.optional(v.string()),
+        categoryId: v.optional(v.string()),
+      }),
+    ),
     limit: v.optional(v.number()),
   },
   returns: v.array(
@@ -120,7 +147,7 @@ export const searchSource = action({
     }
 
     const accessToken = await getEbayAccessToken();
-    const ebayItems = await searchEbayBrowse({ accessToken, query: args.query, limit });
+    const ebayItems = await searchEbayBrowse({ accessToken, query: args.query, filters: args.filters, limit });
 
     const upsertIds = (await ctx.runMutation(api.mutations.items.upsertManyItems, {
       items: ebayItems.map((i) => ({
