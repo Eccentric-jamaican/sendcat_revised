@@ -1,6 +1,8 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import type { Metadata } from "next"
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
+import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: {
@@ -25,7 +27,21 @@ export default function AppLayout({
         <AppSidebar />
         <main className="flex-1 w-full flex flex-col bg-[#050505]">
           <div className="p-4 border-b border-white/10">
-            <SidebarTrigger className="text-white hover:bg-white/10" />
+            <div className="flex items-center justify-between gap-3">
+              <SidebarTrigger className="text-white hover:bg-white/10" />
+              <div className="flex items-center gap-2">
+                <SignedOut>
+                  <SignInButton>
+                    <Button variant="secondary" className="bg-white text-black hover:bg-zinc-200">
+                      Sign in
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </div>
+            </div>
           </div>
           {children}
         </main>
