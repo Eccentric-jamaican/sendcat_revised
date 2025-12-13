@@ -236,7 +236,7 @@ function ExploreWithConvex() {
     }
 
     return chips;
-  }, [filters]);
+  }, [filters, selectedCategoryLabel]);
 
   return (
     <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">
@@ -496,12 +496,13 @@ function ExploreWithConvex() {
                 type="button"
                 variant="ghost"
                 className="text-zinc-300 hover:bg-white/10 hover:text-white"
-                onClick={() =>
-                    setFilters({
-                      itemLocationCountry: "US",
-                      sort: "bestMatch",
-                    })
-                }
+                onClick={() => {
+                  setSelectedCategoryLabel(null);
+                  setFilters({
+                    itemLocationCountry: "US",
+                    sort: "bestMatch",
+                  });
+                }}
               >
                 Reset
               </Button>

@@ -5,28 +5,29 @@ export const upsertTaxonomyCache = mutation({
   args: {
     marketplaceId: v.string(),
     categoryTreeId: v.string(),
-    categories: v.any(),
+    categories: v.array(
+      v.object({
+        categoryId: v.string(),
+        name: v.string(),
+        parentCategoryId: v.optional(v.string()),
+        level: v.number(),
+      }),
+    ),
     fetchedAt: v.number(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("ebayTaxonomyCache")
-      .withIndex("by_marketplaceId", (q) => q.eq("marketplaceId", args.marketplaceId))
-      .unique();
+    const marketplaceId = args.marketplaceId.toUpperCase();
 
     const payload = {
-      marketplaceId: args.marketplaceId,
+      marketplaceId,
       categoryTreeId: args.categoryTreeId,
       categories: args.categories,
       fetchedAt: args.fetchedAt,
     };
 
-    if (existing) {
-      await ctx.db.patch(existing._id, payload);
-    } else {
-      await ctx.db.insert("ebayTaxonomyCache", payload);
-    }
+    // Multi-row semantics (race-safe): always insert. Reads should fetch latest by fetchedAt desc.
+    await ctx.db.insert("ebayTaxonomyCache", payload);
     return null;
   },
 });

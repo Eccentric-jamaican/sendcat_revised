@@ -108,13 +108,21 @@ export default defineSchema({
     categoryTreeId: v.string(),
 
     // Flattened categories: { categoryId, name, parentCategoryId?, level }
-    categories: v.any(),
+    categories: v.array(
+      v.object({
+        categoryId: v.string(),
+        name: v.string(),
+        parentCategoryId: v.optional(v.string()),
+        level: v.number(),
+      }),
+    ),
 
     fetchedAt: v.number(),
 
   })
 
-    .index("by_marketplaceId", ["marketplaceId"]),
+    .index("by_marketplaceId", ["marketplaceId"])
+    .index("by_marketplaceId_and_fetchedAt", ["marketplaceId", "fetchedAt"]),
 
 });
 

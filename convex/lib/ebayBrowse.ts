@@ -50,11 +50,32 @@ export async function searchEbayBrowse(params: {
   const min = params.filters?.minPriceUsd;
   const max = params.filters?.maxPriceUsd;
   if (typeof min === "number" || typeof max === "number") {
-    const minVal = typeof min === "number" && Number.isFinite(min) ? min : undefined;
-    const maxVal = typeof max === "number" && Number.isFinite(max) ? max : undefined;
-    if (minVal !== undefined || maxVal !== undefined) {
-      const lo = minVal !== undefined ? Math.max(0, minVal) : "";
-      const hi = maxVal !== undefined ? Math.max(0, maxVal) : "";
+    const minVal =
+      typeof min === "number" && Number.isFinite(min) ? Math.max(0, min) : undefined;
+    const maxVal =
+      typeof max === "number" && Number.isFinite(max) ? Math.max(0, max) : undefined;
+    let lo = "";
+    let hi = "";
+    let hasRange = false;
+
+    if (minVal !== undefined && maxVal !== undefined) {
+      if (minVal <= maxVal) {
+        lo = `${minVal}`;
+        hi = `${maxVal}`;
+      } else {
+        lo = `${maxVal}`;
+        hi = `${minVal}`;
+      }
+      hasRange = true;
+    } else if (minVal !== undefined) {
+      lo = `${minVal}`;
+      hasRange = true;
+    } else if (maxVal !== undefined) {
+      hi = `${maxVal}`;
+      hasRange = true;
+    }
+
+    if (hasRange) {
       filterParts.push(`price:[${lo}..${hi}]`);
       filterParts.push("priceCurrency:USD");
     }
@@ -86,7 +107,7 @@ export async function searchEbayBrowse(params: {
 
   const loc = params.filters?.itemLocationCountry?.trim();
   if (loc) {
-    filterParts.push(`itemLocationCountry:${loc}`);
+    filterParts.push(`itemLocationCountry:${loc.toUpperCase()}`);
   }
 
   if (filterParts.length) {
