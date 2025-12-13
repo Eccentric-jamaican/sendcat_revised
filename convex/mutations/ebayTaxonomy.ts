@@ -26,8 +26,19 @@ export const upsertTaxonomyCache = mutation({
       fetchedAt: args.fetchedAt,
     };
 
-    // Multi-row semantics (race-safe): always insert. Reads should fetch latest by fetchedAt desc.
+    // Cache semantics (race-safe): insert a new row, then prune older rows for this marketplace.
     await ctx.db.insert("ebayTaxonomyCache", payload);
+
+    const rows = await ctx.db
+      .query("ebayTaxonomyCache")
+      .withIndex("by_marketplaceId_and_fetchedAt", (q) => q.eq("marketplaceId", marketplaceId))
+      .order("desc")
+      .take(100);
+
+    // Keep the newest row (by fetchedAt desc) and delete the rest to prevent unbounded growth.
+    for (const row of rows.slice(1)) {
+      await ctx.db.delete(row._id);
+    }
     return null;
   },
 });
