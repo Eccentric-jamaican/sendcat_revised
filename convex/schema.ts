@@ -100,6 +100,30 @@ export default defineSchema({
 
     .index("by_expiresAt", ["expiresAt"]),
 
+
+  ebayTaxonomyCache: defineTable({
+
+    marketplaceId: v.string(), // e.g. "EBAY_US"
+
+    categoryTreeId: v.string(),
+
+    // Flattened categories: { categoryId, name, parentCategoryId?, level }
+    categories: v.array(
+      v.object({
+        categoryId: v.string(),
+        name: v.string(),
+        parentCategoryId: v.optional(v.string()),
+        level: v.number(),
+      }),
+    ),
+
+    fetchedAt: v.number(),
+
+  })
+
+    .index("by_marketplaceId", ["marketplaceId"])
+    .index("by_marketplaceId_and_fetchedAt", ["marketplaceId", "fetchedAt"]),
+
 });
 
 
