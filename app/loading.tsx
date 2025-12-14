@@ -3,11 +3,8 @@ export default function Loading() {
     <div className="min-h-screen bg-[#050505] text-white">
       {/* Nav skeleton */}
       <nav className="fixed top-6 left-0 right-0 z-50 mx-auto max-w-5xl px-4">
-        <div className="flex items-center justify-between rounded-full border border-white/10 bg-black/90 px-6 py-3 shadow-lg backdrop-blur-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-white/10 animate-pulse" />
-            <div className="h-4 w-20 rounded bg-white/10 animate-pulse" />
-          </div>
+        <div className="flex items-center justify-between rounded-full border border-white/10 bg-black/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
+          <div className="h-5 w-20 rounded bg-white/10 animate-pulse" />
           <div className="hidden md:flex items-center gap-8">
             <div className="h-3 w-16 rounded bg-white/5 animate-pulse" />
             <div className="h-3 w-12 rounded bg-white/5 animate-pulse" />
