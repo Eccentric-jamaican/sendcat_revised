@@ -26,17 +26,17 @@ export function Hero() {
           Shop from your favourite US and UK brands in one place—let us handle shipping, duties, and delivery to your door.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Button 
+        <div className="mx-auto flex max-w-lg flex-col items-center justify-center gap-3 pt-4 sm:flex-row sm:gap-4">
+          <Button
             asChild
             variant="outline"
-            className="h-12 rounded-full border-white/10 bg-white/5 px-8 text-base text-white hover:bg-white/10 hover:text-white"
+            className="h-12 w-full rounded-full border-white/10 bg-white/5 px-6 text-base text-white hover:bg-white/10 hover:text-white sm:w-auto sm:px-8"
           >
             <Link href="#how-it-works">See How It Works</Link>
           </Button>
-          <Button 
+          <Button
             asChild
-            className="h-12 rounded-full bg-white px-8 text-base font-medium text-black hover:bg-zinc-200"
+            className="h-12 w-full rounded-full bg-white px-6 text-base font-medium text-black hover:bg-zinc-200 sm:w-auto sm:px-8"
           >
             <Link href="/app">Start Shopping Now</Link>
           </Button>

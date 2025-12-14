@@ -51,7 +51,7 @@ function AuthButtons() {
 export function Nav() {
   return (
     <nav className="fixed top-6 left-0 right-0 z-50 mx-auto max-w-5xl px-4">
-      <div className="flex items-center justify-between rounded-full border border-white/10 bg-black/90 px-6 py-3 shadow-lg backdrop-blur-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-black/90 px-4 py-3 shadow-lg backdrop-blur-sm sm:gap-4 sm:px-6 md:flex-nowrap">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-black">
@@ -74,12 +74,12 @@ export function Nav() {
         </div>
 
         {/* Auth + CTA */}
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:gap-3 md:w-auto">
           <AuthButtons />
           <Button
             asChild
             variant="secondary"
-            className="rounded-full bg-white px-6 font-medium text-black hover:bg-zinc-200"
+            className="w-full rounded-full bg-white px-5 font-medium text-black hover:bg-zinc-200 sm:w-auto sm:px-6"
           >
             <Link href="/app">Start Shopping</Link>
           </Button>
