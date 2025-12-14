@@ -1,8 +1,32 @@
+"use client";
+
 import { Search, Plane, Home } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function HowItWorks() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "50px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-24 md:py-32" id="how-it-works">
+    <section ref={sectionRef} className="mx-auto max-w-7xl px-4 py-24 md:py-32" id="how-it-works">
       {/* Header */}
       <div className="mb-20 max-w-3xl">
         <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight leading-[1.1]">
@@ -79,10 +103,12 @@ export function HowItWorks() {
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-6 relative group">
              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
              
-             {/* Abstract UI: Plane/Shipping */}
+             {/* Abstract UI: Plane/Shipping - only animate when visible */}
              <div className="absolute inset-0 flex items-center justify-center">
                  <div className="relative w-24 h-24 flex items-center justify-center">
-                     <div className="absolute inset-0 border-2 border-dashed border-zinc-700 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                     <div 
+                       className={`absolute inset-0 border-2 border-dashed border-zinc-700 rounded-full ${isVisible ? "animate-[spin_10s_linear_infinite]" : ""}`}
+                     />
                      <Plane className="w-8 h-8 text-zinc-500" />
                      <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900"></div>
                  </div>

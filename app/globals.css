@@ -121,6 +121,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Testimonials scroll animations - only applied when element is visible */
 @keyframes scroll-left {
   from {
     transform: translateX(0);
@@ -141,28 +142,18 @@
 
 .animate-scroll-left {
   animation: scroll-left 40s linear infinite;
-  will-change: transform;
 }
 
 .animate-scroll-right {
   animation: scroll-right 40s linear infinite;
-  will-change: transform;
 }
 
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-left,
+  .animate-scroll-right {
+    animation: none;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-reveal {
-  animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0; /* Start hidden */
 }
 
 /*

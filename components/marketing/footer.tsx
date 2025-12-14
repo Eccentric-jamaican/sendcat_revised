@@ -1,4 +1,50 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+
+function AnimatedBrandText() {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="mb-12 overflow-hidden">
+      <h1 className="text-[12vw] leading-none font-bold text-white select-none flex w-full justify-between">
+        {"sendcat".split("").map((letter, i) => (
+          <span
+            key={i}
+            className="inline-block transition-all duration-700 ease-out"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(100%)",
+              transitionDelay: isVisible ? `${i * 100}ms` : "0ms",
+            }}
+          >
+            {letter}
+          </span>
+        ))}
+      </h1>
+    </div>
+  );
+}
 
 export function Footer() {
   return (
@@ -68,20 +114,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Big Brand Text */}
-        <div className="mb-12 overflow-hidden">
-          <h1 className="text-[12vw] leading-none font-bold text-white select-none flex w-full justify-between">
-            {"sendcat".split("").map((letter, i) => (
-              <span 
-                key={i} 
-                className="inline-block animate-reveal" 
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
-                {letter}
-              </span>
-            ))}
-          </h1>
-        </div>
+        {/* Big Brand Text - animated on scroll into view */}
+        <AnimatedBrandText />
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm text-zinc-500">

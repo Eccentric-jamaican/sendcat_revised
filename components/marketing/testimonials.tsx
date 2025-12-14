@@ -1,5 +1,6 @@
-import { Quote } from "lucide-react";
-import { cn } from "@/lib/utils";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 
 interface Testimonial {
   company: string;
@@ -52,7 +53,7 @@ const testimonialsRow2: Testimonial[] = [
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <div className="flex h-full w-[300px] flex-col justify-between rounded-xl border border-white/5 bg-zinc-900/80 p-6 transition-all hover:bg-zinc-900/90">
+    <div className="flex h-full w-[300px] flex-shrink-0 flex-col justify-between rounded-xl border border-white/5 bg-zinc-900/80 p-6 transition-all hover:bg-zinc-900/90">
       <div className="space-y-4">
         {/* Company/Brand Placeholder - stylized text for now */}
         <div className="flex items-center gap-2 font-bold text-white text-base tracking-tight">
@@ -86,8 +87,29 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
 }
 
 export function Testimonials() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-24 md:py-32 overflow-hidden" id="reviews">
+    <section ref={sectionRef} className="py-24 md:py-32 overflow-hidden" id="reviews">
       <div className="mb-20 text-center">
         <div className="inline-flex items-center justify-center rounded-sm border border-zinc-800 bg-zinc-900/50 px-3 py-1 text-xs font-mono uppercase tracking-wider text-zinc-400 mb-6">
           <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
@@ -101,7 +123,10 @@ export function Testimonials() {
       <div className="relative flex flex-col gap-6">
         {/* Row 1 - Scroll Left */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-          <div className="flex animate-scroll-left gap-4 px-4 hover:[animation-play-state:paused]">
+          <div 
+            className={`flex gap-4 px-4 hover:[animation-play-state:paused] ${isVisible ? "animate-scroll-left" : ""}`}
+            style={{ willChange: isVisible ? "transform" : "auto" }}
+          >
             {[0, 1, 2].flatMap((copyIndex) =>
               testimonialsRow1.map((testimonial, itemIndex) => (
                 <TestimonialCard key={`row1-copy${copyIndex}-item${itemIndex}`} testimonial={testimonial} />
@@ -112,7 +137,10 @@ export function Testimonials() {
 
         {/* Row 2 - Scroll Right */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-          <div className="flex animate-scroll-right gap-4 px-4 hover:[animation-play-state:paused]">
+          <div 
+            className={`flex gap-4 px-4 hover:[animation-play-state:paused] ${isVisible ? "animate-scroll-right" : ""}`}
+            style={{ willChange: isVisible ? "transform" : "auto" }}
+          >
             {[0, 1, 2].flatMap((copyIndex) =>
               testimonialsRow2.map((testimonial, itemIndex) => (
                 <TestimonialCard key={`row2-copy${copyIndex}-item${itemIndex}`} testimonial={testimonial} />
