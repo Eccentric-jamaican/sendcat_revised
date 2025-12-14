@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export function Comparison() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-24 md:py-32" id="solutions">
+    <section className="mx-auto max-w-6xl px-4 py-24 md:py-32 overflow-hidden" id="solutions">
       {/* Header */}
       <div className="text-center mb-16 space-y-4">
         <div className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-indigo-300">
@@ -18,7 +18,7 @@ export function Comparison() {
       </div>
 
       {/* Comparison Table */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/80">
+      <div className="relative overflow-x-auto rounded-3xl border border-white/10 bg-zinc-900/80">
         <div className="grid grid-cols-4 min-w-[800px]">
           
           {/* Column Headers */}

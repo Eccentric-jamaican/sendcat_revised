@@ -1,8 +1,12 @@
-import Image from "next/image";
-
 export function DashboardPreview() {
   return (
     <div className="relative mx-auto max-w-6xl px-4 pb-20">
+      {/* Background glow effect - contained within bounds */}
+      <div 
+        className="absolute inset-0 bg-indigo-500/20 blur-3xl -z-10 rounded-[3rem] opacity-50" 
+        aria-hidden="true"
+      />
+      
       <div className="relative rounded-2xl border border-white/10 bg-black/80 p-2 shadow-2xl">
         <div className="overflow-hidden rounded-xl border border-white/5 bg-zinc-900/50 aspect-[16/10] relative group">
           <div className="absolute inset-0 flex items-center justify-center text-zinc-500 bg-zinc-900">
@@ -27,9 +31,6 @@ export function DashboardPreview() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
         </div>
       </div>
-      
-      {/* Background glow effect behind the dashboard */}
-      <div className="absolute -inset-4 bg-indigo-500/20 blur-3xl -z-10 rounded-[3rem] opacity-50" />
     </div>
   );
 }

@@ -60,9 +60,13 @@ export default function RootLayout({
         theme: dark,
       }}
     >
-      <html lang="en">
+      <html lang="en" className="overflow-x-hidden bg-[#050505]">
+        <head>
+          {/* Critical CSS to prevent white flash - loads before external stylesheets */}
+          <style dangerouslySetInnerHTML={{ __html: `html,body{background-color:#050505}` }} />
+        </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden bg-[#050505]`}
         >
           <ConvexClientProvider>{children}</ConvexClientProvider>
         </body>
