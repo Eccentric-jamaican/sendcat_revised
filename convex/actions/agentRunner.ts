@@ -43,6 +43,40 @@ function parseJsonStrict<T>(raw: string): T {
   }
 }
 
+/** Default timeout for OpenRouter API calls (ms). Configurable via OPENROUTER_TIMEOUT_MS env var. */
+function getOpenRouterTimeoutMs(): number {
+  const envVal = process.env.OPENROUTER_TIMEOUT_MS;
+  if (envVal) {
+    const parsed = parseInt(envVal, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return 30_000; // default 30s
+}
+
+/**
+ * Fetch with an AbortController timeout. Throws a clear error on timeout.
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    return res;
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`OpenRouter request timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function extractIntent(prompt: string): Promise<IntentResult> {
   const apiKey = getEnv("OPENROUTER_API_KEY");
   const baseUrl = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
@@ -75,22 +109,27 @@ async function extractIntent(prompt: string): Promise<IntentResult> {
     "If you cannot form a good query (missing the product), set needsClarification=true and ask ONE short question.",
   ].join("\n");
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+  const timeoutMs = getOpenRouterTimeoutMs();
+  const res = await fetchWithTimeout(
+    `${baseUrl}/chat/completions`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+      }),
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
+    timeoutMs,
+  );
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -177,18 +216,23 @@ async function generateAssistantReply(input: {
     ...itemLines,
   ].join("\n");
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+  const timeoutMs = getOpenRouterTimeoutMs();
+  const res = await fetchWithTimeout(
+    `${baseUrl}/chat/completions`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.6,
+        messages: [{ role: "system", content: system }, ...input.history, { role: "user", content: context }],
+      }),
     },
-    body: JSON.stringify({
-      model,
-      temperature: 0.6,
-      messages: [{ role: "system", content: system }, ...input.history, { role: "user", content: context }],
-    }),
-  });
+    timeoutMs,
+  );
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
