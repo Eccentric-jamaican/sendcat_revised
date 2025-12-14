@@ -14,6 +14,15 @@ export const getManyItems = query({
       priceUsdCents: v.number(),
       currency: v.optional(v.string()),
       affiliateUrl: v.optional(v.string()),
+      condition: v.optional(v.string()),
+      buyingOptions: v.optional(v.array(v.string())),
+      sellerUsername: v.optional(v.string()),
+      sellerFeedbackPercent: v.optional(v.number()),
+      sellerFeedbackScore: v.optional(v.number()),
+      shippingCostUsdCents: v.optional(v.number()),
+      shippingCurrency: v.optional(v.string()),
+      itemLocation: v.optional(v.string()),
+      shortDescription: v.optional(v.string()),
       lastSeenAt: v.number(),
     }),
   ),
@@ -26,3 +35,4 @@ export const getManyItems = query({
     return results;
   },
 });
+

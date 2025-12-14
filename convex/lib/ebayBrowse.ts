@@ -5,6 +5,15 @@ export type EbayItem = {
   currency?: string;
   imageUrl?: string;
   affiliateUrl?: string;
+  condition?: string;
+  buyingOptions?: string[];
+  sellerUsername?: string;
+  sellerFeedbackPercent?: number;
+  sellerFeedbackScore?: number;
+  shippingCostUsdCents?: number;
+  shippingCurrency?: string;
+  itemLocation?: string;
+  shortDescription?: string;
 };
 
 export type EbayBrowseFilters = {
@@ -25,11 +34,18 @@ export async function searchEbayBrowse(params: {
   query: string;
   filters?: EbayBrowseFilters;
   limit: number;
-}): Promise<EbayItem[]> {
+  offset?: number;
+}): Promise<{ items: EbayItem[]; total: number; nextOffset: number | null }> {
   const url = new URL("https://api.ebay.com/buy/browse/v1/item_summary/search");
   const brandPrefix = params.filters?.brand?.trim();
   url.searchParams.set("q", brandPrefix ? `${brandPrefix} ${params.query}` : params.query);
   url.searchParams.set("limit", String(params.limit));
+  const offset = Math.max(0, Math.floor(params.offset ?? 0));
+  if (offset > 0) {
+    url.searchParams.set("offset", String(offset));
+  }
+  // Request richer fields (seller details, shipping, descriptions, etc.)
+  url.searchParams.set("fieldgroups", "PRODUCT,EXTENDED");
 
   if (params.filters?.categoryId?.trim()) {
     // Browse API supports filtering by category IDs via `category_ids` (comma-separated).
@@ -135,7 +151,27 @@ export async function searchEbayBrowse(params: {
       price?: { value?: string; currency?: string };
       image?: { imageUrl?: string };
       itemWebUrl?: string;
+      condition?: string;
+      buyingOptions?: string[];
+      seller?: {
+        username?: string;
+        feedbackPercentage?: string | number;
+        feedbackScore?: number;
+      };
+      shippingOptions?: Array<{
+        shippingCost?: { value?: string; currency?: string };
+      }>;
+      itemLocation?: {
+        city?: string;
+        stateOrProvince?: string;
+        country?: string;
+      };
+      shortDescription?: string;
     }>;
+    total?: number;
+    offset?: number;
+    limit?: number;
+    next?: string;
   };
 
   const data = (await res.json()) as BrowseResponse;
@@ -162,6 +198,40 @@ export async function searchEbayBrowse(params: {
     const imageUrl = s.image?.imageUrl as string | undefined;
     const affiliateUrl = s.itemWebUrl as string | undefined;
 
+    const condition = typeof s.condition === "string" ? s.condition : undefined;
+
+    const buyingOptions = Array.isArray(s.buyingOptions)
+      ? s.buyingOptions.filter((opt): opt is string => typeof opt === "string" && opt.trim().length > 0)
+      : undefined;
+
+    const sellerUsername = typeof s.seller?.username === "string" ? s.seller.username : undefined;
+    const sellerFeedbackPercentRaw = s.seller?.feedbackPercentage;
+    const sellerFeedbackPercent =
+      typeof sellerFeedbackPercentRaw === "number"
+        ? sellerFeedbackPercentRaw
+        : typeof sellerFeedbackPercentRaw === "string"
+          ? Number(sellerFeedbackPercentRaw)
+          : undefined;
+    const sellerFeedbackScore =
+      typeof s.seller?.feedbackScore === "number" ? s.seller.feedbackScore : undefined;
+
+    const firstShipping = s.shippingOptions?.find((opt) => opt?.shippingCost?.value);
+    const shippingCostValue = firstShipping?.shippingCost?.value;
+    const shippingCostCurrency = firstShipping?.shippingCost?.currency;
+    const shippingCostUsdCents =
+      typeof shippingCostValue === "string" || typeof shippingCostValue === "number"
+        ? Math.round(Number(shippingCostValue) * 100)
+        : undefined;
+
+    const locationParts = [
+      typeof s.itemLocation?.city === "string" ? s.itemLocation.city : undefined,
+      typeof s.itemLocation?.stateOrProvince === "string" ? s.itemLocation.stateOrProvince : undefined,
+      typeof s.itemLocation?.country === "string" ? s.itemLocation.country : undefined,
+    ].filter((part): part is string => Boolean(part?.trim()));
+    const itemLocation = locationParts.length ? locationParts.join(", ") : undefined;
+
+    const shortDescription = typeof s.shortDescription === "string" ? s.shortDescription : undefined;
+
     items.push({
       externalId: String(itemId),
       title: String(title),
@@ -169,8 +239,36 @@ export async function searchEbayBrowse(params: {
       currency,
       imageUrl,
       affiliateUrl,
+      condition,
+      buyingOptions,
+      sellerUsername,
+      sellerFeedbackPercent: Number.isFinite(sellerFeedbackPercent) ? sellerFeedbackPercent : undefined,
+      sellerFeedbackScore,
+      shippingCostUsdCents: Number.isFinite(shippingCostUsdCents) ? shippingCostUsdCents : undefined,
+      shippingCurrency: shippingCostCurrency as string | undefined,
+      itemLocation,
+      shortDescription,
     });
   }
 
-  return items;
+  const apiTotal =
+    typeof data.total === "number"
+      ? data.total
+      : (typeof data.offset === "number" ? data.offset : offset) + items.length;
+  const nextHref = typeof data.next === "string" ? data.next : null;
+  let nextOffset: number | null = null;
+  if (nextHref) {
+    try {
+      const nextUrl = new URL(nextHref);
+      const offsetParam = nextUrl.searchParams.get("offset");
+      if (offsetParam) {
+        const parsed = Number(offsetParam);
+        if (Number.isFinite(parsed)) nextOffset = parsed;
+      }
+    } catch {
+      nextOffset = null;
+    }
+  }
+
+  return { items, total: apiTotal, nextOffset };
 }
