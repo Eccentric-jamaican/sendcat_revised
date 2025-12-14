@@ -210,7 +210,19 @@ function ExploreWithConvex() {
     const shouldOpen = searchParams?.get("agent") === "1";
     const jobId = searchParams?.get("jobId");
     if (shouldOpen) setIsAgentMode(true);
-    if (jobId) setCurrentJobId(jobId as Id<"agentJobs">);
+
+    // Validate the jobId from the URL before casting and setting state.
+    // Convex IDs are opaque strings at runtime; ensure we at least have a
+    // non-empty, URL-safe token (alphanumeric, dash, underscore) of reasonable length.
+    if (typeof jobId === "string" && /^[A-Za-z0-9_-]{6,}$/.test(jobId)) {
+      setCurrentJobId(jobId as Id<"agentJobs">);
+    } else if (jobId) {
+      // If present but invalid, avoid setting malformed IDs and log for debugging.
+      // Do not set state (leave as null) so downstream queries won't receive a bad id.
+      // eslint-disable-next-line no-console
+      console.warn("Invalid agent jobId in URL, ignoring:", jobId);
+      setCurrentJobId(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

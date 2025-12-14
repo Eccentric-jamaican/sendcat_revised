@@ -301,7 +301,7 @@ export const runAgentJob = internalAction({
         resultItemIds: itemIds,
       });
 
-      // Push notify (best effort)
+      // Push notify (best effort) — handle errors locally so they don't fail the job.
       const payload = {
         title: "SendCat: Results ready",
         body: `Tap to view results for: ${intent.query}`,
@@ -311,18 +311,47 @@ export const runAgentJob = internalAction({
         sessionId: job.sessionId,
       });
       if (sub) {
-        const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-        const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-        const vapidSubject = process.env.VAPID_SUBJECT;
-        if (vapidPublicKey && vapidPrivateKey && vapidSubject) {
-          webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-          await webpush.sendNotification(
-            {
-              endpoint: sub.endpoint,
-              keys: { p256dh: sub.p256dh, auth: sub.auth },
-            },
-            JSON.stringify(payload),
-          );
+        try {
+          const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+          const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+          const vapidSubject = process.env.VAPID_SUBJECT;
+          if (vapidPublicKey && vapidPrivateKey && vapidSubject) {
+            webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+            await webpush.sendNotification(
+              {
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth },
+              },
+              JSON.stringify(payload),
+            );
+          }
+        } catch (err: unknown) {
+          // Log the push failure, including context so we can debug subscription problems.
+          // Do not rethrow — notifications are best-effort.
+          const msg = err instanceof Error ? err.message : String(err);
+          // eslint-disable-next-line no-console
+          console.error("Push notification failed", {
+            sessionId: job.sessionId,
+            endpoint: sub.endpoint,
+            error: msg,
+          });
+
+          // If the error indicates the subscription is gone/unsubscribed (HTTP 410/404),
+          // attempt to remove the stale subscription row so we don't keep trying it.
+          const statusCode = (err as any)?.statusCode ?? (err as any)?.status;
+          if (statusCode === 410 || statusCode === 404) {
+            try {
+              await ctx.runMutation(internal.mutations.pushSubscriptions.deleteByEndpoint, {
+                endpoint: sub.endpoint,
+              });
+            } catch (delErr: unknown) {
+              // eslint-disable-next-line no-console
+              console.error("Failed to remove stale push subscription", {
+                endpoint: sub.endpoint,
+                error: delErr instanceof Error ? delErr.message : String(delErr),
+              });
+            }
+          }
         }
       }
     } catch (e: unknown) {
