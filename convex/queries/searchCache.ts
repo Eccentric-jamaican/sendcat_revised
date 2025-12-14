@@ -9,6 +9,14 @@ export const getSearchCache = query({
   returns: v.nullable(
     v.object({
       itemIds: v.array(v.id("items")),
+      meta: v.optional(
+        v.object({
+          total: v.optional(v.number()),
+          offset: v.optional(v.number()),
+          limit: v.optional(v.number()),
+          nextOffset: v.optional(v.number()),
+        }),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
@@ -22,6 +30,7 @@ export const getSearchCache = query({
       return null;
     }
 
-    return { itemIds: entry.itemIds };
+    return { itemIds: entry.itemIds, meta: entry.meta ?? undefined };
   },
 });
+
