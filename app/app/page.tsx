@@ -513,6 +513,8 @@ function ExploreWithConvex() {
     return chips;
   }, [filters, selectedCategoryLabel]);
 
+  let pageContent: React.ReactNode;
+
   // If in Agent Mode, render the modified UI
   if (isAgentMode) {
     const messageList = Array.isArray(messages) ? messages : [];
@@ -539,7 +541,7 @@ function ExploreWithConvex() {
       shortDescription: i.shortDescription,
     }));
 
-    return (
+    pageContent = (
       <div className="flex flex-col h-[100dvh] md:h-[calc(100vh-4.5rem)] w-full relative bg-[#050505]">
         {/* Header - Agent Controls */}
         <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-white/5 bg-[#050505] shrink-0 z-10">
@@ -743,11 +745,10 @@ function ExploreWithConvex() {
         </div>
       </div>
     );
-  }
-
-  // Standard Explore Mode
-  return (
-    <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">
+  } else {
+    // Standard Explore Mode
+    pageContent = (
+      <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">
       {/* Search Bar */}
       <div className="flex items-center w-full">
         <div className="relative w-full">
@@ -1171,161 +1172,172 @@ function ExploreWithConvex() {
         ) : null}
       </div>
 
-      <Sheet open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
-        <SheetContent className="w-full sm:max-w-md border-l border-white/10 bg-zinc-950 text-white overflow-y-auto p-0 flex flex-col h-full" side="right">
-          {selectedItem ? (
-            <div className="flex flex-col h-full">
-              <SheetHeader className="p-4 sm:p-6 border-b border-white/10 shrink-0">
-                <SheetTitle className="text-left text-lg sm:text-xl font-semibold text-white">Product Details</SheetTitle>
-              </SheetHeader>
-              
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-                <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 border border-white/10 relative shrink-0">
-                  {selectedItem.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selectedItem.imageUrl}
-                      alt={selectedItem.title}
-                      className="h-full w-full object-contain p-4"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-zinc-500">
-                      No image
-                    </div>
-                  )}
+      </div>
+    );
+  }
+
+  const productDetailSheet = (
+    <Sheet open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
+      <SheetContent className="w-full sm:max-w-md border-l border-white/10 bg-zinc-950 text-white overflow-y-auto p-0 flex flex-col h-full" side="right">
+        {selectedItem ? (
+          <div className="flex flex-col h-full">
+            <SheetHeader className="p-4 sm:p-6 border-b border-white/10 shrink-0">
+              <SheetTitle className="text-left text-lg sm:text-xl font-semibold text-white">Product Details</SheetTitle>
+            </SheetHeader>
+            
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-900 border border-white/10 relative shrink-0">
+                {selectedItem.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={selectedItem.imageUrl}
+                    alt={selectedItem.title}
+                    className="h-full w-full object-contain p-4"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-zinc-500">
+                    No image
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-base sm:text-lg font-medium leading-snug">{selectedItem.title}</h2>
+                
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-bold text-white">
+                    ${(selectedItem.priceUsdCents / 100).toFixed(2)}
+                  </span>
+                  <span className="text-sm text-zinc-400 font-medium">{selectedItem.currency ?? "USD"}</span>
                 </div>
 
-                <div className="space-y-3 sm:space-y-4">
-                  <h2 className="text-base sm:text-lg font-medium leading-snug">{selectedItem.title}</h2>
-                  
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl font-bold text-white">
-                      ${(selectedItem.priceUsdCents / 100).toFixed(2)}
-                    </span>
-                    <span className="text-sm text-zinc-400 font-medium">{selectedItem.currency ?? "USD"}</span>
+                {(selectedItem.condition || selectedItem.buyingOptions?.length) && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedItem.condition ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-white">
+                        <Package className="w-3 h-3 text-indigo-400" />
+                        {selectedItem.condition}
+                      </span>
+                    ) : null}
+                    {selectedItem.buyingOptions?.map((option) => (
+                      <span
+                        key={option}
+                        className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-zinc-900 px-2.5 py-1 text-[11px] sm:text-xs capitalize text-zinc-300 font-medium"
+                      >
+                        {option.replaceAll("_", " ")}
+                      </span>
+                    ))}
                   </div>
+                )}
+              </div>
 
-                  {(selectedItem.condition || selectedItem.buyingOptions?.length) && (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedItem.condition ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] sm:text-xs font-medium text-white">
-                          <Package className="w-3 h-3 text-indigo-400" />
-                          {selectedItem.condition}
-                        </span>
-                      ) : null}
-                      {selectedItem.buyingOptions?.map((option) => (
-                        <span
-                          key={option}
-                          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-zinc-900 px-2.5 py-1 text-[11px] sm:text-xs capitalize text-zinc-300 font-medium"
-                        >
-                          {option.replaceAll("_", " ")}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+              <div className="grid grid-cols-2 gap-4 text-sm py-4 border-y border-white/10">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Source</span>
+                  <span className="text-white capitalize font-medium text-sm">{selectedItem.source}</span>
                 </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Item ID</span>
+                  <span className="text-white font-mono text-xs truncate opacity-70" title={selectedItem.externalId}>
+                    {selectedItem.externalId}
+                  </span>
+                </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm py-4 border-y border-white/10">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Source</span>
-                    <span className="text-white capitalize font-medium text-sm">{selectedItem.source}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Item ID</span>
-                    <span className="text-white font-mono text-xs truncate opacity-70" title={selectedItem.externalId}>
-                      {selectedItem.externalId}
-                    </span>
+              {selectedItem.shortDescription ? (
+                <div className="space-y-2">
+                  <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Quick summary</p>
+                  <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
+                    <p className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed">
+                      {selectedItem.shortDescription}
+                    </p>
                   </div>
                 </div>
+              ) : null}
 
-                {selectedItem.shortDescription ? (
-                  <div className="space-y-2">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium">Quick summary</p>
-                    <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
-                      <p className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed">
-                        {selectedItem.shortDescription}
-                      </p>
+              <div className="grid gap-3 sm:gap-4">
+                {selectedItem.sellerUsername ? (
+                  <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
+                    <BadgeCheck className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Seller</p>
+                      <p className="text-sm font-semibold text-white">{selectedItem.sellerUsername}</p>
+                      {(selectedItem.sellerFeedbackPercent !== undefined ||
+                        selectedItem.sellerFeedbackScore !== undefined) && (
+                        <p className="text-xs text-zinc-400 mt-1 font-medium">
+                          {selectedItem.sellerFeedbackPercent !== undefined
+                            ? `${selectedItem.sellerFeedbackPercent.toFixed(1)}% positive`
+                            : null}
+                          {selectedItem.sellerFeedbackPercent !== undefined &&
+                          selectedItem.sellerFeedbackScore !== undefined
+                            ? " · "
+                            : ""}
+                          {selectedItem.sellerFeedbackScore !== undefined
+                            ? `${selectedItem.sellerFeedbackScore.toLocaleString()} reviews`
+                            : null}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : null}
 
-                <div className="grid gap-3 sm:gap-4">
-                  {selectedItem.sellerUsername ? (
-                    <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
-                      <BadgeCheck className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Seller</p>
-                        <p className="text-sm font-semibold text-white">{selectedItem.sellerUsername}</p>
-                        {(selectedItem.sellerFeedbackPercent !== undefined ||
-                          selectedItem.sellerFeedbackScore !== undefined) && (
-                          <p className="text-xs text-zinc-400 mt-1 font-medium">
-                            {selectedItem.sellerFeedbackPercent !== undefined
-                              ? `${selectedItem.sellerFeedbackPercent.toFixed(1)}% positive`
-                              : null}
-                            {selectedItem.sellerFeedbackPercent !== undefined &&
-                            selectedItem.sellerFeedbackScore !== undefined
-                              ? " · "
-                              : ""}
-                            {selectedItem.sellerFeedbackScore !== undefined
-                              ? `${selectedItem.sellerFeedbackScore.toLocaleString()} reviews`
-                              : null}
+                {selectedItem.shippingCostUsdCents !== undefined || selectedItem.itemLocation ? (
+                  <div className="grid gap-3 sm:gap-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
+                    {selectedItem.shippingCostUsdCents !== undefined ? (
+                      <div className="flex items-start gap-3">
+                        <Truck className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Shipping</p>
+                          <p className="text-sm font-semibold text-white">
+                            ${(selectedItem.shippingCostUsdCents / 100).toFixed(2)}{" "}
+                            {selectedItem.shippingCurrency ?? "USD"}
                           </p>
-                        )}
+                          <p className="text-[10px] sm:text-xs text-zinc-400 mt-1">Carrier options at checkout</p>
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
+                    ) : null}
 
-                  {selectedItem.shippingCostUsdCents !== undefined || selectedItem.itemLocation ? (
-                    <div className="grid gap-3 sm:gap-4 rounded-2xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4">
-                      {selectedItem.shippingCostUsdCents !== undefined ? (
-                        <div className="flex items-start gap-3">
-                          <Truck className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Shipping</p>
-                            <p className="text-sm font-semibold text-white">
-                              ${(selectedItem.shippingCostUsdCents / 100).toFixed(2)}{" "}
-                              {selectedItem.shippingCurrency ?? "USD"}
-                            </p>
-                            <p className="text-[10px] sm:text-xs text-zinc-400 mt-1">Carrier options at checkout</p>
-                          </div>
+                    {selectedItem.itemLocation ? (
+                      <div className="flex items-start gap-3 pt-3 sm:pt-4 border-t border-white/5">
+                        <MapPin className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Ships from</p>
+                          <p className="text-sm font-medium text-white">{selectedItem.itemLocation}</p>
                         </div>
-                      ) : null}
-
-                      {selectedItem.itemLocation ? (
-                        <div className="flex items-start gap-3 pt-3 sm:pt-4 border-t border-white/5">
-                          <MapPin className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-500 font-medium mb-1">Ships from</p>
-                            <p className="text-sm font-medium text-white">{selectedItem.itemLocation}</p>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6 border-t border-white/10 bg-zinc-950 shrink-0 mt-auto pb-8 sm:pb-6">
-                <Button
-                  className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                  onClick={() => {
-                    if (selectedItem.affiliateUrl) {
-                      window.open(
-                        `/api/out?url=${encodeURIComponent(selectedItem.affiliateUrl)}`,
-                        "_blank",
-                        "noopener,noreferrer",
-                      );
-                    }
-                  }}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View on {selectedItem.source === "ebay" ? "eBay" : "Store"}
-                </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
-          ) : null}
-        </SheetContent>
-      </Sheet>
-    </div>
-  )
+
+            <div className="p-4 sm:p-6 border-t border-white/10 bg-zinc-950 shrink-0 mt-auto pb-8 sm:pb-6">
+              <Button
+                className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                onClick={() => {
+                  if (selectedItem.affiliateUrl) {
+                    window.open(
+                      `/api/out?url=${encodeURIComponent(selectedItem.affiliateUrl)}`,
+                      "_blank",
+                      "noopener,noreferrer",
+                    );
+                  }
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                View on {selectedItem.source === "ebay" ? "eBay" : "Store"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </SheetContent>
+    </Sheet>
+  );
+
+  return (
+    <>
+      {pageContent}
+      {productDetailSheet}
+    </>
+  );
 }

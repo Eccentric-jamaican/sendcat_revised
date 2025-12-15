@@ -1,5 +1,6 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
+import { normalizeEbayImageUrl } from "../lib/imageUtils";
 
 export const getManyItems = query({
   args: { itemIds: v.array(v.id("items")) },
@@ -30,7 +31,14 @@ export const getManyItems = query({
     const results = [];
     for (const id of args.itemIds) {
       const doc = await ctx.db.get(id);
-      if (doc) results.push(doc);
+      if (doc) {
+        // Normalize eBay image URLs to high-resolution versions
+        const imageUrl =
+          doc.source === "ebay"
+            ? normalizeEbayImageUrl(doc.imageUrl)
+            : doc.imageUrl;
+        results.push({ ...doc, imageUrl });
+      }
     }
     return results;
   },

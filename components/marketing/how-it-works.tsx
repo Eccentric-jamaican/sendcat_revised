@@ -41,7 +41,7 @@ export function HowItWorks() {
         {/* Step 1 */}
         <div className="space-y-6">
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-6 relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent" />
             
             {/* Abstract UI: Search Bar */}
             <div className="absolute inset-0 flex items-center justify-center p-6">
@@ -59,7 +59,7 @@ export function HowItWorks() {
             </div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Step 1: Ask SendCat</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">Step 1: Ask SendCat</h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
               Tell our AI what you&apos;re looking for. It searches eBay and major US stores to find the best deals for you.
             </p>
@@ -69,7 +69,7 @@ export function HowItWorks() {
         {/* Step 2 */}
         <div className="space-y-6">
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-6 relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent" />
              
              {/* Abstract UI: Cost Card */}
              <div className="absolute inset-0 flex items-center justify-center p-6">
@@ -84,14 +84,14 @@ export function HowItWorks() {
                     </div>
                     <div className="h-px w-full bg-white/10 my-2"></div>
                     <div className="flex justify-between items-center">
-                         <div className="h-3 w-20 bg-indigo-500/50 rounded-full"></div>
-                         <div className="h-3 w-12 bg-indigo-500/50 rounded-full"></div>
+                         <div className="h-3 w-20 bg-orange-500/50 rounded-full"></div>
+                         <div className="h-3 w-12 bg-orange-500/50 rounded-full"></div>
                     </div>
                 </div>
              </div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Step 2: See Total Cost</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">Step 2: See Total Cost</h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
               We calculate shipping, duties, and taxes instantly. The price you see is the final price to land it in Jamaica.
             </p>
@@ -101,7 +101,7 @@ export function HowItWorks() {
         {/* Step 3 */}
         <div className="space-y-6">
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-6 relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent" />
              
              {/* Abstract UI: Plane/Shipping - only animate when visible */}
              <div className="absolute inset-0 flex items-center justify-center">
@@ -115,7 +115,7 @@ export function HowItWorks() {
              </div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Step 3: We Ship It</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">Step 3: We Ship It</h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
               Use your free US address or let us buy it for you. We handle the air freight and customs clearance.
             </p>
@@ -125,7 +125,7 @@ export function HowItWorks() {
         {/* Step 4 */}
         <div className="space-y-6">
           <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-6 relative group">
-             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent" />
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent" />
 
              {/* Abstract UI: Delivery */}
              <div className="absolute inset-0 flex items-center justify-center p-8">
@@ -139,7 +139,7 @@ export function HowItWorks() {
              </div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Step 4: Delivery</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">Step 4: Delivery</h3>
             <p className="text-sm text-zinc-400 leading-relaxed">
               Track your package in real-time. Pick it up or get it delivered straight to your door in any parish.
             </p>

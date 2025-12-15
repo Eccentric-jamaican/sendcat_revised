@@ -6,7 +6,7 @@ export function Hero() {
     <section className="relative pt-32 pb-20 text-center px-4">
       {/* Optimized gradient background - using transform for GPU acceleration */}
       <div 
-        className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-indigo-500/20 via-purple-500/10 to-transparent -z-10" 
+        className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-orange-500/20 via-blue-500/10 to-transparent -z-10" 
         style={{ 
           filter: "blur(64px)",
           transform: "translateZ(0)", // Force GPU layer

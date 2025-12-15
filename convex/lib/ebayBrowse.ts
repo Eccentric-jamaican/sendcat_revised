@@ -1,3 +1,5 @@
+import { normalizeEbayImageUrl } from "./imageUtils";
+
 export type EbayItem = {
   externalId: string;
   title: string;
@@ -195,7 +197,7 @@ export async function searchEbayBrowse(params: {
     }
     const priceUsdCents = Math.round(value * 100);
 
-    const imageUrl = s.image?.imageUrl as string | undefined;
+    const imageUrl = normalizeEbayImageUrl(s.image?.imageUrl as string | undefined);
     const affiliateUrl = s.itemWebUrl as string | undefined;
 
     const condition = typeof s.condition === "string" ? s.condition : undefined;

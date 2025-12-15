@@ -1,5 +1,6 @@
 import { query } from "../_generated/server";
 import { v } from "convex/values";
+import { normalizeEbayImageUrl } from "../lib/imageUtils";
 
 export const getTrendingItems = query({
   args: {
@@ -33,21 +34,30 @@ export const getTrendingItems = query({
     const limit = Math.max(1, Math.min(50, Math.floor(args.limit ?? 12)));
     const source = args.source?.toLowerCase();
 
+    let items;
     if (!source) {
       // Generic fallback: show most recently seen items (across all sources).
-      // This is intentionally simple for MVP; later we’ll compute weighted events.
-      return await ctx.db
+      // This is intentionally simple for MVP; later we'll compute weighted events.
+      items = await ctx.db
         .query("items")
         .withIndex("by_lastSeenAt")
         .order("desc")
         .take(limit);
+    } else {
+      items = await ctx.db
+        .query("items")
+        .withIndex("by_source_and_lastSeenAt", (q) => q.eq("source", source))
+        .order("desc")
+        .take(limit);
     }
 
-    return await ctx.db
-      .query("items")
-      .withIndex("by_source_and_lastSeenAt", (q) => q.eq("source", source))
-      .order("desc")
-      .take(limit);
+    // Normalize eBay image URLs to high-resolution versions
+    return items.map((item) => ({
+      ...item,
+      imageUrl:
+        item.source === "ebay"
+          ? normalizeEbayImageUrl(item.imageUrl)
+          : item.imageUrl,
+    }));
   },
 });
-
