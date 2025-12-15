@@ -6,7 +6,7 @@ export function Comparison() {
     <section className="mx-auto max-w-6xl px-4 py-24 md:py-32 overflow-hidden" id="solutions">
       {/* Header */}
       <div className="text-center mb-16 space-y-4">
-        <div className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-indigo-300">
+        <div className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-orange-400">
           Why SendCat
         </div>
         <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight">
@@ -25,10 +25,10 @@ export function Comparison() {
           <div className="col-span-1 p-6 border-b border-white/10 bg-transparent">
              {/* Empty top-left */}
           </div>
-          <div className="col-span-1 p-6 border-b border-white/10 bg-indigo-600/10 border-t-4 border-t-indigo-500 rounded-t-lg">
+          <div className="col-span-1 p-6 border-b border-white/10 bg-orange-600/10 border-t-4 border-t-orange-500 rounded-t-lg">
             <div className="flex flex-col items-center gap-2 text-center">
               <span className="font-semibold text-white text-lg">SendCat</span>
-              <span className="text-xs text-indigo-300 font-medium">AI Shopping + Logistics</span>
+              <span className="text-xs text-orange-300 font-medium">AI Shopping + Logistics</span>
             </div>
           </div>
           <div className="col-span-1 p-6 border-b border-white/10 text-center flex flex-col items-center justify-center gap-1">
@@ -44,7 +44,7 @@ export function Comparison() {
           <div className="col-span-1 p-6 border-b border-white/5 flex items-center text-sm font-medium text-zinc-300 bg-zinc-900/20">
             Search Experience
           </div>
-          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-indigo-600/5 border-x border-indigo-500/10">
+          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-orange-600/5 border-x border-orange-500/10">
             <div className="text-center text-sm text-white">
               <span className="block font-medium">AI-Assisted</span>
               <span className="text-xs text-zinc-400">Natural language search</span>
@@ -67,7 +67,7 @@ export function Comparison() {
           <div className="col-span-1 p-6 border-b border-white/5 flex items-center text-sm font-medium text-zinc-300 bg-zinc-900/20">
             Cost Transparency
           </div>
-          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-indigo-600/5 border-x border-indigo-500/10">
+          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-orange-600/5 border-x border-orange-500/10">
             <div className="text-center text-sm text-white">
               <span className="block font-medium">100% Upfront</span>
               <span className="text-xs text-zinc-400">Duties & GCT included</span>
@@ -90,7 +90,7 @@ export function Comparison() {
           <div className="col-span-1 p-6 border-b border-white/5 flex items-center text-sm font-medium text-zinc-300 bg-zinc-900/20">
             Product Discovery
           </div>
-          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-indigo-600/5 border-x border-indigo-500/10">
+          <div className="col-span-1 p-6 border-b border-white/5 flex items-center justify-center bg-orange-600/5 border-x border-orange-500/10">
             <div className="text-center text-sm text-white">
               <span className="block font-medium">Multi-Store</span>
               <span className="text-xs text-zinc-400">eBay, Amazon, etc.</span>
@@ -110,7 +110,7 @@ export function Comparison() {
           <div className="col-span-1 p-6 flex items-center text-sm font-medium text-zinc-300 bg-zinc-900/20">
             Shipping Speed
           </div>
-          <div className="col-span-1 p-6 flex items-center justify-center bg-indigo-600/5 border-x border-indigo-500/10">
+          <div className="col-span-1 p-6 flex items-center justify-center bg-orange-600/5 border-x border-orange-500/10">
              <div className="text-center text-sm text-white">
               <span className="block font-medium">Express (3-5 Days)</span>
               <span className="text-xs text-zinc-400">Regular flights</span>

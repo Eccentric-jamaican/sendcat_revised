@@ -1,6 +1,22 @@
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
+/**
+ * Clear all search cache entries. Useful when image URL normalization
+ * or other data transformations change and you want fresh data.
+ */
+export const clearAllSearchCache = mutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const allCached = await ctx.db.query("searchCache").collect();
+    for (const entry of allCached) {
+      await ctx.db.delete(entry._id);
+    }
+    return allCached.length;
+  },
+});
+
 export const setSearchCache = mutation({
   args: {
     key: v.string(),

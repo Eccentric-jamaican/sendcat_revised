@@ -12,6 +12,7 @@ import type * as actions_agentRunner from "../actions/agentRunner.js";
 import type * as actions_ebayTaxonomy from "../actions/ebayTaxonomy.js";
 import type * as actions_search from "../actions/search.js";
 import type * as lib_ebayBrowse from "../lib/ebayBrowse.js";
+import type * as lib_imageUtils from "../lib/imageUtils.js";
 import type * as mutations_agentJobs from "../mutations/agentJobs.js";
 import type * as mutations_ebayTaxonomy from "../mutations/ebayTaxonomy.js";
 import type * as mutations_events from "../mutations/events.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "actions/ebayTaxonomy": typeof actions_ebayTaxonomy;
   "actions/search": typeof actions_search;
   "lib/ebayBrowse": typeof lib_ebayBrowse;
+  "lib/imageUtils": typeof lib_imageUtils;
   "mutations/agentJobs": typeof mutations_agentJobs;
   "mutations/ebayTaxonomy": typeof mutations_ebayTaxonomy;
   "mutations/events": typeof mutations_events;

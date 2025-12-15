@@ -3,7 +3,7 @@ export function DashboardPreview() {
     <div className="relative mx-auto max-w-6xl px-4 pb-20">
       {/* Background glow effect - contained within bounds */}
       <div 
-        className="absolute inset-0 bg-indigo-500/20 blur-3xl -z-10 rounded-[3rem] opacity-50" 
+        className="absolute inset-0 bg-blue-500/20 blur-3xl -z-10 rounded-[3rem] opacity-50" 
         aria-hidden="true"
       />
       
