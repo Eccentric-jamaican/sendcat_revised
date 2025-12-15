@@ -1,11 +1,11 @@
-import { mutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 /**
  * Clear all search cache entries. Useful when image URL normalization
  * or other data transformations change and you want fresh data.
  */
-export const clearAllSearchCache = mutation({
+export const clearAllSearchCache = internalMutation({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
