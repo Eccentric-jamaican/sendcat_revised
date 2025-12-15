@@ -20,7 +20,7 @@ function BenefitSection({ title, description, label, icon: Icon, imagePosition, 
         {/* Text Content */}
         <div className="flex-1 space-y-8">
           <div className="space-y-4">
-            <p className="text-sm font-medium text-indigo-400">{label}</p>
+            <p className="text-sm font-medium text-orange-400">{label}</p>
             <h2 className="text-3xl font-medium tracking-tight text-white md:text-4xl">
               {title}
             </h2>
@@ -31,9 +31,9 @@ function BenefitSection({ title, description, label, icon: Icon, imagePosition, 
         </div>
 
         {/* Visual Content */}
-        <div className="flex-1">
+          <div className="flex-1">
           <div className="relative aspect-square md:aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/50 p-8 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-50" />
             
             {/* Abstract UI representation */}
             <div className="relative h-full w-full rounded-xl border border-white/5 bg-black/60 p-6">
@@ -71,19 +71,19 @@ export function Benefits() {
         {/* Mock Chat Interface */}
         <div className="flex flex-col gap-4">
             <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs text-indigo-300">AI</div>
+                <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-300">AI</div>
                 <div className="rounded-2xl rounded-tl-none bg-zinc-800 p-3 text-sm text-zinc-300 max-w-[80%]">
                     I found 3 blazers under $200 that match your style.
                 </div>
             </div>
             <div className="flex gap-3 flex-row-reverse">
                  <div className="h-8 w-8 rounded-full bg-zinc-700 flex items-center justify-center text-xs text-zinc-400">You</div>
-                <div className="rounded-2xl rounded-tr-none bg-indigo-600 p-3 text-sm text-white max-w-[80%]">
+                <div className="rounded-2xl rounded-tr-none bg-orange-600 p-3 text-sm text-white max-w-[80%]">
                     Show me the blue one.
                 </div>
             </div>
              <div className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-xs text-indigo-300">AI</div>
+                <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-300">AI</div>
                 <div className="rounded-2xl rounded-tl-none bg-zinc-800 p-3 text-sm text-zinc-300 max-w-[80%]">
                     Here are the details for the Navy Blue Slim Fit Blazer...
                 </div>
@@ -113,8 +113,8 @@ export function Benefits() {
                     <span className="text-white">$45.00</span>
                 </div>
                 <div className="flex justify-between items-center font-medium pt-2">
-                    <span className="text-indigo-400">Total to Jamaica</span>
-                    <span className="text-indigo-400">$220.00</span>
+                    <span className="text-orange-400">Total to Jamaica</span>
+                    <span className="text-orange-400">$220.00</span>
                 </div>
            </div>
       </BenefitSection>
