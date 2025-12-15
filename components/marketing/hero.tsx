@@ -19,7 +19,7 @@ export function Hero() {
         <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-white leading-[1.1]">
           Shop US Stores.
           <br />
-          <span className="text-zinc-200">Impact-Site-Verification: 680a93c8-94f5-4e48-9262-d0229c89684b</span>
+          <span className="text-zinc-200">Delivered to Jamaica.</span>
         </h1>
         
         <p className="max-w-2xl mx-auto text-lg md:text-xl text-zinc-400 leading-relaxed">
