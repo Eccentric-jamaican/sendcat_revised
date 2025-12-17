@@ -275,15 +275,20 @@ function ExploreWithConvex() {
     }
   }, [messages, isAgentMode, currentJobId, job?.status]);
 
+  // Reset checkout UI when selected item changes
   useEffect(() => {
-    // When item sheet changes, reset checkout UI and prefill known fields.
     if (!selectedItem) return;
     setCheckoutOpen(false);
     setCheckoutError(null);
     setCheckoutResult(null);
+  }, [selectedItem]);
+
+  // Prefill email when user signs in
+  useEffect(() => {
+    if (!selectedItem) return;
     const email = user?.primaryEmailAddress?.emailAddress;
     if (email) setCheckoutEmail(email);
-  }, [selectedItem, user?.primaryEmailAddress?.emailAddress]);
+  }, [user?.primaryEmailAddress?.emailAddress, selectedItem]);
 
 
   useEffect(() => {
