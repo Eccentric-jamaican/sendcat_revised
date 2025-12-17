@@ -1455,7 +1455,7 @@ function ExploreWithConvex() {
                           </div>
 
                           <Button
-                            className="w-full bg-white text-black hover:bg-zinc-200"
+                            className="w-full h-11 bg-white text-black hover:bg-zinc-200"
                             disabled={
                               isCreatingCheckout ||
                               !checkoutEmail.trim() ||
