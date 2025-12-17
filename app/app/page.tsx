@@ -1392,65 +1392,65 @@ function ExploreWithConvex() {
                               value={checkoutEmail}
                               onChange={(e) => setCheckoutEmail(e.target.value)}
                               placeholder="Contact email"
-                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                             />
                             <div className="grid gap-2 sm:grid-cols-2">
                               <Input
                                 value={checkoutFirstName}
                                 onChange={(e) => setCheckoutFirstName(e.target.value)}
                                 placeholder="First name"
-                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                               />
                               <Input
                                 value={checkoutLastName}
                                 onChange={(e) => setCheckoutLastName(e.target.value)}
                                 placeholder="Last name"
-                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                               />
                             </div>
                             <Input
                               value={checkoutPhone}
                               onChange={(e) => setCheckoutPhone(e.target.value)}
                               placeholder="Phone number (include country code if possible)"
-                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                             />
                             <Input
                               value={checkoutAddress1}
                               onChange={(e) => setCheckoutAddress1(e.target.value)}
                               placeholder="Address line 1"
-                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                             />
                             <Input
                               value={checkoutAddress2}
                               onChange={(e) => setCheckoutAddress2(e.target.value)}
                               placeholder="Address line 2 (optional)"
-                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                             />
                             <div className="grid gap-2 sm:grid-cols-3">
                               <Input
                                 value={checkoutCity}
                                 onChange={(e) => setCheckoutCity(e.target.value)}
                                 placeholder="City"
-                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                               />
                               <Input
                                 value={checkoutState}
                                 onChange={(e) => setCheckoutState(e.target.value)}
                                 placeholder="State/Province"
-                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                               />
                               <Input
                                 value={checkoutPostal}
                                 onChange={(e) => setCheckoutPostal(e.target.value)}
                                 placeholder="Postal code"
-                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                               />
                             </div>
                             <Input
                               value={checkoutCountry}
                               onChange={(e) => setCheckoutCountry(e.target.value)}
                               placeholder="Country (ISO2, e.g. US)"
-                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
                             />
                           </div>
 
