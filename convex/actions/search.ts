@@ -7,8 +7,8 @@ import { v } from "convex/values";
 import { api } from "../_generated/api";
 import { searchEbayBrowse } from "../lib/ebayBrowse";
 import crypto from "node:crypto";
+import { getEbayAppAccessToken } from "../lib/ebayClient";
 
-type TokenCache = { token: string; expiresAtMs: number };
 type SearchFilters = {
   minPriceUsd?: number;
   maxPriceUsd?: number;
@@ -41,51 +41,7 @@ type SearchCacheResult =
       };
     }
   | null;
-let ebayTokenCache: TokenCache | null = null;
 const SEARCH_CACHE_VERSION = "v2";
-
-async function getEbayAccessToken(): Promise<string> {
-  const clientId = process.env.EBAY_CLIENT_ID;
-  const clientSecret = process.env.EBAY_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    throw new Error("Missing EBAY_CLIENT_ID or EBAY_CLIENT_SECRET");
-  }
-
-  const now = Date.now();
-  if (ebayTokenCache && ebayTokenCache.expiresAtMs - 60_000 > now) {
-    return ebayTokenCache.token;
-  }
-
-  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-
-  const tokenRes = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${authHeader}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      grant_type: "client_credentials",
-      scope: "https://api.ebay.com/oauth/api_scope",
-    }),
-  });
-
-  if (!tokenRes.ok) {
-    const text = await tokenRes.text().catch(() => "");
-    throw new Error(`eBay OAuth failed (${tokenRes.status}): ${text}`);
-  }
-
-  const tokenJson = (await tokenRes.json()) as {
-    access_token?: string;
-    expires_in?: number;
-  };
-  const token = tokenJson.access_token;
-  const expiresIn = Number(tokenJson.expires_in ?? 0);
-  if (!token) throw new Error("eBay OAuth returned no access_token");
-
-  ebayTokenCache = { token, expiresAtMs: now + expiresIn * 1000 };
-  return token;
-}
 
 function cacheKeyFor(params: { source: string; query: string; filters?: unknown; offset: number; limit: number }) {
   const raw = `${SEARCH_CACHE_VERSION}::${params.source}::${params.query}::${JSON.stringify(params.filters ?? {})}::${params.offset}::${params.limit}`.toLowerCase();
@@ -186,7 +142,7 @@ export const searchSource = action({
       throw new Error(`Source not implemented yet: ${source}`);
     }
 
-    const accessToken = await getEbayAccessToken();
+    const accessToken = await getEbayAppAccessToken();
     const ebayResult = await searchEbayBrowse({
       accessToken,
       query: args.query,
