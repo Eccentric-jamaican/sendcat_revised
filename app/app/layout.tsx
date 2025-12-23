@@ -25,8 +25,8 @@ export default function AppLayout({
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-[#050505] text-white dark">
         <AppSidebar />
-        <main className="flex-1 w-full flex flex-col bg-[#050505]">
-          <div className="p-4 border-b border-white/10">
+        <main className="flex-1 w-full flex flex-col bg-[#050505] overflow-y-auto h-screen">
+          <div className="sticky top-0 z-30 p-4 border-b border-white/10 bg-[#050505]">
             <div className="flex items-center justify-between gap-3">
               <SidebarTrigger className="text-white hover:bg-white/10" />
               <div className="flex items-center gap-2">

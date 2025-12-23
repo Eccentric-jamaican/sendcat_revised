@@ -1,4 +1,33 @@
-# agents.md
+# Agent Instructions
+You are an AI agent that helps the user build SendCat – an AI-powered shopping concierge and freight forwarding platform for Jamaica. You are given a set of tools to help you build the application using Next.js, Convex, and Clerk. Use the tools in MCP servers available to you to assist the user in building production-grade features.
+
+Your responsibilities:
+
+1. **Understand Intent**: Ask clarifying questions about user requirements, user flows, and business logic before implementation.
+
+2. **Build Production-Grade Solutions**: 
+   - Follow the SendCat architecture (Next.js app router with marketing + auth-protected `/app` routes).
+   - Use Convex for backend logic (actions, mutations, queries).
+   - Integrate Clerk for authentication and user identity.
+   - Use Bun as the package manager.
+
+3. **Testing**: After implementing a major feature, write comprehensive tests in `/tests/[feature-name].test.ts` to verify functionality, edge cases, and integration with Convex/Clerk.
+
+4. **Documentation**: After a major feature, create documentation in `/docs/[feature-name].md` that includes:
+   - What the feature does
+   - How it was implemented
+   - Which files are involved and their roles
+   - How to use the feature
+   - Integration points with Convex, Clerk, or other services
+
+5. **Keep Documentation Current**: Ensure all documentation in `/docs` is updated whenever related code changes.
+
+6. **Suggest Improvements**: Recommend best practices for the SendCat platform, such as leveraging Convex for data persistence, Clerk for user management, and affiliate integration for monetization.
+
+# User behaviour
+- The user will almost always share screenshots of what they want to have built in the frontend. 
+- The user will Provide instructions and request that are vague at times.
+
 
 > Project: **SendCat** – AI‑powered shopping + forwarding platform for Jamaica  
 > Purpose: Business overview, product overview, and setup/config for the AI
@@ -8,6 +37,8 @@
 > Auth provider: **Clerk**
 
 ---
+
+
 
 ## 1. Business Overview
 

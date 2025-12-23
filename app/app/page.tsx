@@ -798,8 +798,9 @@ function ExploreWithConvex() {
   } else {
     // Standard Explore Mode
     pageContent = (
-      <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">
-      {/* Search Bar */}
+      <div className="flex flex-col max-w-7xl mx-auto w-full">
+      {/* Sticky Search Bar */}
+      <div className="sticky top-[57px] z-20 bg-[#050505] pt-8 px-8 pb-4">
       <div className="flex items-center w-full">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
@@ -824,7 +825,7 @@ function ExploreWithConvex() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 mt-4">
         <div className="flex flex-wrap gap-2">
           {activeFilterChips.map((chip) => (
             <button
@@ -852,6 +853,7 @@ function ExploreWithConvex() {
           <SlidersHorizontal className="h-4 w-4" />
           All filters
         </Button>
+      </div>
       </div>
 
       {filtersOpen ? (
@@ -1100,6 +1102,8 @@ function ExploreWithConvex() {
         </div>
       ) : null}
 
+      {/* Scrollable Content */}
+      <div className="flex flex-col gap-8 px-8 pb-8">
       {/* Stores */}
       <div className="md:hidden">
         <Carousel
@@ -1220,6 +1224,7 @@ function ExploreWithConvex() {
             {hasMore ? <div ref={loadMoreRef} className="h-1 w-full" /> : null}
           </div>
         ) : null}
+      </div>
       </div>
 
       </div>
