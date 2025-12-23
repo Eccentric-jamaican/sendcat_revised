@@ -72,8 +72,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-2 px-2">
+      <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:px-0">
+        <Link
+          href="/"
+          className="flex items-center gap-2 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center"
+        >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-black">
             <ShoppingBag className="h-5 w-5" />
           </div>
