@@ -5,25 +5,29 @@ import { internalAction } from "../_generated/server";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import webpush from "web-push";
+import { AGENT_TOOLS, normalizeToolOutput } from "../lib/agentTools";
 
-type IntentResult = {
-  intent: string;
-  query: string;
-  filters?: {
-    minPriceUsd?: number;
-    maxPriceUsd?: number;
-    condition?: "new" | "used" | "refurbished";
-    buyingFormat?: "fixedPrice" | "auction";
-    sort?: "bestMatch" | "priceAsc" | "priceDesc" | "newlyListed";
-    freeShippingOnly?: boolean;
-    returnsAcceptedOnly?: boolean;
-    itemLocationCountry?: string;
-    brand?: string;
-    categoryId?: string;
+type ToolCall = {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
   };
-  needsClarification?: boolean;
-  clarifyingQuestion?: string;
 };
+
+type AgentResponse = {
+  content: string | null;
+  tool_calls?: ToolCall[];
+};
+
+type ChatMessage =
+  | { role: "system"; content: string }
+  | { role: "user"; content: string }
+  | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
+  | { role: "tool"; tool_call_id: string; name: string; content: string };
+
+
 
 function getEnv(name: string): string {
   const v = process.env[name];
@@ -31,17 +35,7 @@ function getEnv(name: string): string {
   return v;
 }
 
-function parseJsonStrict<T>(raw: string): T {
-  // Try strict JSON first
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    // Common fallback: model wraps JSON in ```json ... ```
-    const match = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    if (match?.[1]) return JSON.parse(match[1]) as T;
-    throw new Error("Failed to parse model JSON output");
-  }
-}
+
 
 /** Default timeout for OpenRouter API calls (ms). Configurable via OPENROUTER_TIMEOUT_MS env var. */
 function getOpenRouterTimeoutMs(): number {
@@ -77,37 +71,16 @@ async function fetchWithTimeout(
   }
 }
 
-async function extractIntent(prompt: string): Promise<IntentResult> {
+function historyToOpenRouter(messages: Array<{ role: string; content: string }>): ChatMessage[] {
+  return messages
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+}
+
+async function callOpenRouter(messages: ChatMessage[], tools: Record<string, unknown>[]): Promise<AgentResponse> {
   const apiKey = getEnv("OPENROUTER_API_KEY");
   const baseUrl = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
   const model = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
-
-  const system = [
-    "You are an intent parser for a shopping assistant that helps a user shop like an expert store clerk.",
-    "Return ONLY valid JSON (no markdown).",
-    "Schema (all keys required unless marked optional):",
-    "{",
-    '  "intent": "product_search",',
-    '  "query": "string",',
-    '  "filters": {',
-    '    "minPriceUsd"?: number,',
-    '    "maxPriceUsd"?: number,',
-    '    "condition"?: "new"|"used"|"refurbished",',
-    '    "buyingFormat"?: "fixedPrice"|"auction",',
-    '    "sort"?: "bestMatch"|"priceAsc"|"priceDesc"|"newlyListed",',
-    '    "freeShippingOnly"?: boolean,',
-    '    "returnsAcceptedOnly"?: boolean,',
-    '    "itemLocationCountry"?: string,',
-    '    "brand"?: string,',
-    '    "categoryId"?: string',
-    "  }",
-    '  "needsClarification"?: boolean,',
-    '  "clarifyingQuestion"?: string',
-    "}",
-    "Use itemLocationCountry='US' unless the user asks otherwise.",
-    "If user gives a budget like '$500', map to maxPriceUsd.",
-    "If you cannot form a good query (missing the product), set needsClarification=true and ask ONE short question.",
-  ].join("\n");
 
   const timeoutMs = getOpenRouterTimeoutMs();
   const res = await fetchWithTimeout(
@@ -121,11 +94,9 @@ async function extractIntent(prompt: string): Promise<IntentResult> {
       body: JSON.stringify({
         model,
         temperature: 0.2,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: prompt },
-        ],
-        response_format: { type: "json_object" },
+        messages,
+        tools,
+        tool_choice: "auto",
       }),
     },
     timeoutMs,
@@ -137,111 +108,24 @@ async function extractIntent(prompt: string): Promise<IntentResult> {
   }
 
   const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
+    choices?: Array<{ message?: AgentResponse }>;
   };
-  const content = json.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenRouter returned no content");
+  const response = json.choices?.[0]?.message;
+  if (!response) throw new Error("OpenRouter returned no content");
 
-  const parsed = parseJsonStrict<IntentResult>(content);
-  if (parsed.needsClarification) {
-    if (!parsed.clarifyingQuestion) parsed.clarifyingQuestion = "What product are you looking for?";
-    if (!parsed.query) parsed.query = "";
-    if (!parsed.intent) parsed.intent = "product_search";
-    return parsed;
-  }
-  if (!parsed.query || typeof parsed.query !== "string") throw new Error("Model intent output missing query");
-  if (!parsed.intent) parsed.intent = "product_search";
-  return parsed;
-}
-
-type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
-
-function buildHistoryForModel(args: { messages: Array<{ role: string; content: string }>; maxTurns: number }): ChatMessage[] {
-  // Keep the last N user/assistant messages (system messages aren't helpful to replay).
-  const ua = args.messages.filter((m) => m.role === "user" || m.role === "assistant");
-  const sliced = ua.slice(-Math.max(1, args.maxTurns * 2));
-  return sliced.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+  return response;
 }
 
 function stripMarkdown(input: string): string {
   let s = input;
-  // unwrap fenced code blocks
   s = s.replace(/```(?:json)?\s*([\s\S]*?)\s*```/gi, "$1");
-  // headings -> plain
   s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
-  // bullets -> plain bullets (not markdown)
   s = s.replace(/^\s*[-*+]\s+/gm, "• ");
-  // numbered list "1." -> "1) "
   s = s.replace(/^\s*(\d+)\.\s+/gm, "$1) ");
-  // links [text](url) -> text (url)
   s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
-  // emphasis / inline code markers
   s = s.replace(/[*_~`]/g, "");
-  // collapse extra blank lines
   s = s.replace(/\n{3,}/g, "\n\n");
   return s.trim();
-}
-
-async function generateAssistantReply(input: {
-  prompt: string;
-  history: ChatMessage[];
-  intent: IntentResult;
-  items: Array<{ title: string; priceUsdCents: number; externalId: string; affiliateUrl?: string }>;
-}): Promise<string> {
-  const apiKey = getEnv("OPENROUTER_API_KEY");
-  const baseUrl = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
-  const model = process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
-
-  const itemLines = input.items.slice(0, 8).map((i) => {
-    const price = `$${(i.priceUsdCents / 100).toFixed(2)}`;
-    return `- ${i.title} (${price}) [id:${i.externalId}]`;
-  });
-
-  const system = [
-    "You are SendCat's shopping concierge and freight-forwarding assistant for Jamaican shoppers.",
-    "Be conversational and helpful like a store clerk.",
-    "Use the conversation history to understand what the user means.",
-    "You have already searched eBay and must summarize results and ask 1-2 smart follow-up questions if helpful.",
-    "Do not mention internal tool calls or JSON.",
-    "IMPORTANT: Output plain text only. Do not use Markdown formatting (no # headings, no bullet '-' lists, no **bold**, no backticks).",
-    "If you include lists, use short sentences separated by line breaks, and use the '•' character for bullets.",
-  ].join("\n");
-
-  const context = [
-    `User request (latest): ${input.prompt}`,
-    `Parsed intent: ${input.intent.intent}`,
-    `Search query used: ${input.intent.query}`,
-    `Filters: ${JSON.stringify(input.intent.filters ?? {})}`,
-    "Top eBay results:",
-    ...itemLines,
-  ].join("\n");
-
-  const timeoutMs = getOpenRouterTimeoutMs();
-  const res = await fetchWithTimeout(
-    `${baseUrl}/chat/completions`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.6,
-        messages: [{ role: "system", content: system }, ...input.history, { role: "user", content: context }],
-      }),
-    },
-    timeoutMs,
-  );
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`OpenRouter reply error (${res.status}): ${text}`);
-  }
-
-  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const raw = json.choices?.[0]?.message?.content?.trim() || "Here are a few good options I found.";
-  return stripMarkdown(raw);
 }
 
 export const runAgentJob = internalAction({
@@ -274,81 +158,149 @@ export const runAgentJob = internalAction({
     try {
       const threadMessages: Array<{ role: "user" | "assistant" | "system"; content: string }> =
         await ctx.runQuery(api.queries.agentJobs.listThreadMessages, { threadId });
-      const history = buildHistoryForModel({
-        messages: threadMessages.map((m) => ({ role: m.role, content: m.content })),
-        maxTurns: 6,
-      });
 
-      // Use conversation history for intent extraction by concatenating a compact recap.
-      const recap = history
-        .slice(-6)
-        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
-        .join("\n");
-      const intent = await extractIntent(`Conversation:\n${recap}\n\nLatest user message:\n${job.prompt}`);
+      const history: ChatMessage[] = [
+        {
+          role: "system",
+          content: [
+            "You are SendCat's autonomous shopping concierge for Jamaica.",
+            "Your goal is to find products and calculate their TOTAL LANDED COST to Jamaica.",
+            "Workflow:",
+            "1. Search marketplaces (eBay for structure, Exa for broad web/Amazon/Nvidia).",
+            "2. If results are found, always call 'estimate_landed_cost' for the best options.",
+            "3. Finally, give a conversational helpful reply with '•' bullets and no markdown.",
+            "If the user is vague, call a search tool anyway to see what's out there, or ask a clarifying question.",
+          ].join("\n")
+        },
+        ...historyToOpenRouter(threadMessages),
+        { role: "user", content: job.prompt }
+      ];
 
-      if (intent.needsClarification) {
-        await ctx.runMutation(internal.mutations.agentJobs.appendAssistantMessage, {
-          jobId: args.jobId,
-          threadId,
-          content: intent.clarifyingQuestion ?? "What product are you looking for?",
-          createdAt: Date.now(),
-        });
-        await ctx.runMutation(internal.mutations.agentJobs.setJobCompleted, {
-          jobId: args.jobId,
-          completedAt: Date.now(),
-          intent,
-          resultItemIds: [],
-        });
-        return null;
+      let iterations = 0;
+      const MAX_ITERATIONS = 5;
+      const finalResultItemIds: Id<"items">[] = [];
+
+      while (iterations < MAX_ITERATIONS) {
+        iterations++;
+        const response = await callOpenRouter(history, AGENT_TOOLS);
+
+        if (response.tool_calls) {
+          history.push({ role: "assistant", content: response.content, tool_calls: response.tool_calls });
+
+          for (const toolCall of response.tool_calls) {
+            const toolArgs = JSON.parse(toolCall.function.arguments);
+            let toolResult;
+
+            if (toolCall.function.name === "search_ebay") {
+              await ctx.runMutation(internal.mutations.agentJobs.appendSystemMessage, {
+                jobId: args.jobId, threadId, content: `Searching eBay for: ${toolArgs.query}`, createdAt: Date.now()
+              });
+              const search = await ctx.runAction(api.actions.search.searchSource, {
+                source: "ebay",
+                query: toolArgs.query,
+                filters: {
+                  minPriceUsd: toolArgs.minPrice,
+                  maxPriceUsd: toolArgs.maxPrice,
+                  condition: toolArgs.condition,
+                  sort: toolArgs.sort ?? "bestMatch",
+                  itemLocationCountry: "US"
+                },
+                limit: 12, offset: 0
+              });
+              toolResult = normalizeToolOutput("search_ebay", search);
+              finalResultItemIds.push(...(search.items.map((i) => i.itemId)));
+            }
+            else if (toolCall.function.name === "search_exa") {
+              await ctx.runMutation(internal.mutations.agentJobs.appendSystemMessage, {
+                jobId: args.jobId, threadId, content: `Searching web for: ${toolArgs.query}`, createdAt: Date.now()
+              });
+              // @ts-ignore - searchExa is conditionally available until api.d.ts regenerates
+              const searchAction = (internal.actions.search as Record<string, unknown>).searchExa as any;
+              const search = await ctx.runAction(searchAction, {
+                query: toolArgs.query,
+                numResults: 10,
+                includeDomains: toolArgs.includeDomains,
+                type: toolArgs.searchStrategy === "broad" ? "neural" : "auto",
+                category: "company"
+              });
+
+              // Persist Exa results so they show up in UI carousels
+              const itemsToUpsert = (search.items || []).map((i: Record<string, unknown>) => ({
+                source: "exa",
+                externalId: i.externalId || i.itemId,
+                title: i.title,
+                imageUrl: i.imageUrl,
+                priceUsdCents: i.priceUsdCents || 0,
+                currency: i.currency || "USD",
+                affiliateUrl: i.affiliateUrl,
+              }));
+
+              const upsertedIds = await ctx.runMutation(api.mutations.items.upsertManyItems, {
+                items: itemsToUpsert,
+                now: Date.now(),
+              });
+
+              finalResultItemIds.push(...upsertedIds);
+              toolResult = normalizeToolOutput("search_exa", search);
+            }
+            else if (toolCall.function.name === "estimate_landed_cost") {
+              const price = toolArgs.productPriceUsd;
+              const weight = toolArgs.weightLbs || 1;
+
+              // Basic freight forwarding rates: ~$5 USD per lb + $10 handling
+              const shippingUsd = (weight * 5) + 10;
+
+              // Jamaica Duty Estimates
+              let dutyUsd = 0;
+              if (price > 100) {
+                const dutyRate = toolArgs.category === "clothing" ? 0.30 : 0.20;
+                const baseDuty = price * dutyRate;
+                const gct = (price + shippingUsd + baseDuty) * 0.15;
+                dutyUsd = baseDuty + gct;
+              }
+
+              toolResult = {
+                shippingUsd: shippingUsd.toFixed(2),
+                dutyUsd: dutyUsd.toFixed(2),
+                totalUsd: (price + shippingUsd + dutyUsd).toFixed(2),
+                currency: "USD",
+                breakdown: price > 100 ? "Includes Duty & GCT" : "Duty Free (Under $100)"
+              };
+            }
+
+            history.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              name: toolCall.function.name,
+              content: JSON.stringify(toolResult)
+            });
+          }
+          continue; // Loop to let it think about tool results
+        }
+
+        if (response.content) {
+          const assistantMessage = stripMarkdown(response.content);
+          await ctx.runMutation(internal.mutations.agentJobs.appendAssistantMessage, {
+            jobId: args.jobId,
+            threadId,
+            content: assistantMessage,
+            createdAt: Date.now(),
+          });
+          break;
+        }
       }
-
-      await ctx.runMutation(internal.mutations.agentJobs.appendSystemMessage, {
-        jobId: args.jobId,
-        threadId,
-        content: `Searching eBay for: ${intent.query}`,
-        createdAt: Date.now(),
-      });
-
-      const search = await ctx.runAction(api.actions.search.searchSource, {
-        source: "ebay",
-        query: intent.query,
-        filters: intent.filters ?? { itemLocationCountry: "US", sort: "bestMatch" },
-        limit: 24,
-        offset: 0,
-      });
-
-      const itemIds = search.items.map((i) => i.itemId as Id<"items">);
-
-      const assistantMessage = await generateAssistantReply({
-        prompt: job.prompt,
-        history,
-        intent,
-        items: search.items.map((i) => ({
-          title: i.title,
-          priceUsdCents: i.priceUsdCents,
-          externalId: i.externalId,
-          affiliateUrl: i.affiliateUrl,
-        })),
-      });
-
-      await ctx.runMutation(internal.mutations.agentJobs.appendAssistantMessage, {
-        jobId: args.jobId,
-        threadId,
-        content: assistantMessage,
-        createdAt: Date.now(),
-      });
 
       await ctx.runMutation(internal.mutations.agentJobs.setJobCompleted, {
         jobId: args.jobId,
         completedAt: Date.now(),
-        intent,
-        resultItemIds: itemIds,
+        intent: { intent: "product_search", query: job.prompt }, // Simplified for setJobCompleted
+        resultItemIds: [...new Set(finalResultItemIds)],
       });
 
       // Push notify (best effort) — handle errors locally so they don't fail the job.
       const payload = {
         title: "SendCat: Results ready",
-        body: `Tap to view results for: ${intent.query}`,
+        body: `Tap to view results for your request`,
         url: `/app?agent=1&jobId=${args.jobId}`,
       };
       const sub = await ctx.runQuery(internal.queries.pushSubscriptions.getLatestForSession, {
@@ -373,7 +325,7 @@ export const runAgentJob = internalAction({
           // Log the push failure, including context so we can debug subscription problems.
           // Do not rethrow — notifications are best-effort.
           const msg = err instanceof Error ? err.message : String(err);
-          // eslint-disable-next-line no-console
+
           console.error("Push notification failed", {
             sessionId: job.sessionId,
             endpoint: sub.endpoint,
@@ -382,14 +334,14 @@ export const runAgentJob = internalAction({
 
           // If the error indicates the subscription is gone/unsubscribed (HTTP 410/404),
           // attempt to remove the stale subscription row so we don't keep trying it.
-          const statusCode = (err as any)?.statusCode ?? (err as any)?.status;
+          const statusCode = (err as { statusCode?: number; status?: number })?.statusCode ?? (err as { statusCode?: number; status?: number })?.status;
           if (statusCode === 410 || statusCode === 404) {
             try {
               await ctx.runMutation(internal.mutations.pushSubscriptions.deleteByEndpoint, {
                 endpoint: sub.endpoint,
               });
             } catch (delErr: unknown) {
-              // eslint-disable-next-line no-console
+
               console.error("Failed to remove stale push subscription", {
                 endpoint: sub.endpoint,
                 error: delErr instanceof Error ? delErr.message : String(delErr),

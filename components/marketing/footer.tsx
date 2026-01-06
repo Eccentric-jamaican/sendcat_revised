@@ -55,19 +55,19 @@ export function Footer() {
           {/* Column 1 */}
           <div className="space-y-16">
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Shop</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Shop</h3>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">eBay Search</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Amazon (Coming Soon)</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Walmart (Coming Soon)</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">eBay Search</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Amazon (Coming Soon)</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Walmart (Coming Soon)</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Account</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Account</h3>
               <ul className="space-y-4">
-                <li><Link href="/sign-in" className="text-white hover:text-zinc-300 transition-colors">Sign In</Link></li>
-                <li><Link href="/sign-up" className="text-white hover:text-zinc-300 transition-colors">Create Account</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Track Order</Link></li>
+                <li><Link href="/sign-in" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Sign In</Link></li>
+                <li><Link href="/sign-up" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Create Account</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Track Order</Link></li>
               </ul>
             </div>
           </div>
@@ -75,19 +75,19 @@ export function Footer() {
           {/* Column 2 */}
           <div className="space-y-16">
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Services</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Services</h3>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Freight Forwarding</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Assisted Purchase</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Business Solutions</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Freight Forwarding</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Assisted Purchase</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Business Solutions</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Company</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Company</h3>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">About Us</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Careers</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Contact</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">About Us</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Careers</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Contact</Link></li>
               </ul>
             </div>
           </div>
@@ -95,20 +95,20 @@ export function Footer() {
           {/* Column 3 */}
           <div className="space-y-16">
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Resources</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Resources</h3>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Shipping Calculator</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Customs Guide</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Restricted Items</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Help Center</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Shipping Calculator</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Customs Guide</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Restricted Items</Link></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h3 className="text-zinc-500 font-medium">Legal</h3>
+              <h3 className="text-sm-fluid font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6">Legal</h3>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Terms & Conditions</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="#" className="text-white hover:text-zinc-300 transition-colors">Refund Policy</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-sm-fluid text-white hover:text-zinc-300 transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -120,12 +120,12 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm text-zinc-500">
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-white transition-colors">X (fka Twitter)</Link>
-            <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
-            <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
+            <Link href="#" className="text-sm-fluid hover:text-white transition-colors">X (fka Twitter)</Link>
+            <Link href="#" className="text-sm-fluid hover:text-white transition-colors">LinkedIn</Link>
+            <Link href="#" className="text-sm-fluid hover:text-white transition-colors">Instagram</Link>
           </div>
-          <div>
-            &copy; 2024 - 2025 SendCat Logistics Ltd.
+          <div className="text-sm-fluid text-zinc-500">
+            &copy; {new Date().getFullYear()} SendCat Logistics Ltd.
           </div>
         </div>
       </div>

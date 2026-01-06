@@ -53,11 +53,11 @@ export function Nav() {
       <div className="flex items-center justify-between rounded-full border border-white/10 bg-black/90 px-4 sm:px-6 py-3 shadow-lg backdrop-blur-sm">
         {/* Wordmark */}
         <Link href="/" className="flex items-center">
-          <span className="font-semibold text-white text-lg">SendCat</span>
+          <span className="font-bold text-white text-h3 tracking-tight">SendCat</span>
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-zinc-300">
+        <div className="hidden lg:flex items-center gap-8 text-sm-fluid font-medium text-zinc-400">
           <Link href="#how-it-works" className="flex items-center gap-1 hover:text-white transition-colors">
             How it works
           </Link>

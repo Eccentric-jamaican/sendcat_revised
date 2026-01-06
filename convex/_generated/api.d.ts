@@ -9,10 +9,15 @@
  */
 
 import type * as actions_agentRunner from "../actions/agentRunner.js";
+import type * as actions_analyzeImage from "../actions/analyzeImage.js";
 import type * as actions_ebayTaxonomy from "../actions/ebayTaxonomy.js";
+import type * as actions_exaSearch from "../actions/exaSearch.js";
 import type * as actions_search from "../actions/search.js";
+import type * as lib_agentTools from "../lib/agentTools.js";
 import type * as lib_ebayBrowse from "../lib/ebayBrowse.js";
+import type * as lib_exaSearch from "../lib/exaSearch.js";
 import type * as lib_imageUtils from "../lib/imageUtils.js";
+import type * as lib_vision from "../lib/vision.js";
 import type * as mutations_agentJobs from "../mutations/agentJobs.js";
 import type * as mutations_ebayTaxonomy from "../mutations/ebayTaxonomy.js";
 import type * as mutations_events from "../mutations/events.js";
@@ -35,10 +40,15 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "actions/agentRunner": typeof actions_agentRunner;
+  "actions/analyzeImage": typeof actions_analyzeImage;
   "actions/ebayTaxonomy": typeof actions_ebayTaxonomy;
+  "actions/exaSearch": typeof actions_exaSearch;
   "actions/search": typeof actions_search;
+  "lib/agentTools": typeof lib_agentTools;
   "lib/ebayBrowse": typeof lib_ebayBrowse;
+  "lib/exaSearch": typeof lib_exaSearch;
   "lib/imageUtils": typeof lib_imageUtils;
+  "lib/vision": typeof lib_vision;
   "mutations/agentJobs": typeof mutations_agentJobs;
   "mutations/ebayTaxonomy": typeof mutations_ebayTaxonomy;
   "mutations/events": typeof mutations_events;

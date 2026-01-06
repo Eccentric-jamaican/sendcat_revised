@@ -26,8 +26,8 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-// Menu items.
-const items = [
+// Menu items (shared with bottom nav).
+export const appNavItems = [
   {
     title: "Explore",
     url: "/app",
@@ -87,7 +87,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {appNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} className="h-10" tooltip={item.title}>
                     <Link href={item.url}>

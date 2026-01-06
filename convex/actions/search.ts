@@ -1,11 +1,10 @@
-"use node";
-
-import { action } from "../_generated/server";
+import { action, internalAction } from "../_generated/server";
 import type { GenericActionCtx } from "convex/server";
 import type { DataModel, Doc, Id } from "../_generated/dataModel";
 import { v } from "convex/values";
 import { api } from "../_generated/api";
 import { searchEbayBrowse } from "../lib/ebayBrowse";
+import { searchAndContents, ExaSearchResult } from "../lib/exaSearch";
 import crypto from "node:crypto";
 
 type TokenCache = { token: string; expiresAtMs: number };
@@ -32,14 +31,14 @@ type SearchActionCtx = GenericActionCtx<DataModel>;
 type ItemDoc = Doc<"items">;
 type SearchCacheResult =
   | {
-      itemIds: Id<"items">[];
-      meta?: {
-        total?: number;
-        offset?: number;
-        limit?: number;
-        nextOffset?: number;
-      };
-    }
+    itemIds: Id<"items">[];
+    meta?: {
+      total?: number;
+      offset?: number;
+      limit?: number;
+      nextOffset?: number;
+    };
+  }
   | null;
 let ebayTokenCache: TokenCache | null = null;
 const SEARCH_CACHE_VERSION = "v2";
@@ -264,3 +263,52 @@ export const searchSource = action({
     };
   },
 });
+
+export const searchExa = internalAction({
+  args: {
+    query: v.string(),
+    numResults: v.optional(v.number()),
+    includeDomains: v.optional(v.array(v.string())),
+    category: v.optional(v.string()),
+    type: v.optional(v.string()),
+  },
+  returns: v.object({
+    items: v.array(v.any()),
+  }),
+  handler: async (ctx, args) => {
+    const searchResults = await searchAndContents({
+      query: args.query,
+      numResults: args.numResults ?? 10,
+      highlights: true,
+      contents: { text: true, maxCharacters: 3000 },
+      includeDomains: args.includeDomains,
+      category: args.category as "company" | "research paper" | "news" | "pdf" | "github" | "tweet" | "personal site" | "financial report" | "people" | undefined,
+      type: args.type as "auto" | "neural" | "fast" | "deep" | undefined,
+    });
+
+    const items = searchResults.results.map((result: ExaSearchResult) => ({
+      itemId: result.url,
+      source: "exa",
+      externalId: result.url,
+      title: result.title,
+      imageUrl: result.image,
+      priceUsdCents: result.price ? parsePriceInternal(result.price) : undefined,
+      currency: result.currency,
+      affiliateUrl: result.url,
+      exaScore: result.score,
+      exaHighlights: result.highlights?.map((h) => h.text) || [],
+      publishedDate: result.publishedDate,
+      author: result.author,
+    }));
+
+    return { items };
+  },
+});
+
+function parsePriceInternal(priceText: string | undefined): number | undefined {
+  if (!priceText) return undefined;
+  const match = priceText.match(/\$?(\d+\.?\d*)/);
+  if (!match) return undefined;
+  const price = parseFloat(match[1]);
+  return Math.round(price * 100);
+}

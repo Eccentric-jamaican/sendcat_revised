@@ -78,8 +78,8 @@ export function FAQ() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:py-32" id="faq">
       <div className="mb-20 text-center">
-        <h2 className="text-3xl md:text-5xl font-medium text-white tracking-tight">
-          Answers with structure
+        <h2 className="text-h2 font-semibold text-white tracking-tight">
+          Common Questions
         </h2>
       </div>
 
@@ -88,7 +88,7 @@ export function FAQ() {
           <div key={sectionIndex} className="grid grid-cols-1 md:grid-cols-12 py-8 border-b border-white/10 gap-8 md:gap-0">
             {/* Category Name (Left Column) */}
             <div className="md:col-span-4 lg:col-span-3">
-              <h3 className="text-lg font-medium text-zinc-300 sticky top-24">
+              <h3 className="text-h3 font-semibold text-zinc-300 sticky top-24">
                 {section.category}
               </h3>
             </div>
@@ -106,7 +106,7 @@ export function FAQ() {
                       className="flex w-full items-start justify-between text-left gap-4"
                     >
                       <span className={cn(
-                        "text-lg font-medium transition-colors",
+                        "text-base md:text-lg font-medium transition-colors leading-tight",
                         isOpen ? "text-white" : "text-zinc-400 group-hover:text-zinc-200"
                       )}>
                         {item.question}
@@ -119,14 +119,14 @@ export function FAQ() {
                         )}
                       </span>
                     </button>
-                    
-                    <div 
+
+                    <div
                       className={cn(
                         "overflow-hidden transition-all duration-300 ease-in-out",
                         isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0"
                       )}
                     >
-                      <p className="text-zinc-400 leading-relaxed pr-12 text-base">
+                      <p className="text-body text-zinc-400 pr-12">
                         {item.answer}
                       </p>
                     </div>

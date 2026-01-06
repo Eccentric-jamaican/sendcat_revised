@@ -57,29 +57,29 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
       <div className="space-y-4">
         {/* Company/Brand Placeholder - stylized text for now */}
         <div className="flex items-center gap-2 font-bold text-white text-base tracking-tight">
-             {/* Simple icon based on first letter for visual variety */}
-             <div className="flex h-5 w-5 items-center justify-center rounded bg-white text-black text-[10px]">
-                 {testimonial.company.charAt(0)}
-             </div>
-             {testimonial.company}
+          {/* Simple icon based on first letter for visual variety */}
+          <div className="flex h-5 w-5 items-center justify-center rounded bg-white text-black text-[10px]">
+            {testimonial.company.charAt(0)}
+          </div>
+          {testimonial.company}
         </div>
 
-        <blockquote className="text-sm leading-relaxed text-zinc-300 font-light">
-          {testimonial.quote}
+        <blockquote className="text-body text-zinc-300 font-light leading-relaxed">
+          &ldquo;{testimonial.quote}&rdquo;
         </blockquote>
       </div>
 
       <div className="mt-6 flex items-center gap-3">
         {/* Author Avatar Placeholder */}
         <div className="h-8 w-8 overflow-hidden rounded-full bg-zinc-800 border border-white/10">
-           {/* In a real app, use next/image here */}
-           <div className="h-full w-full flex items-center justify-center text-[10px] text-zinc-500">
-               {testimonial.author.charAt(0)}
-           </div>
+          {/* In a real app, use next/image here */}
+          <div className="h-full w-full flex items-center justify-center text-[10px] text-zinc-500">
+            {testimonial.author.charAt(0)}
+          </div>
         </div>
         <div>
-          <div className="font-medium text-white text-sm">{testimonial.author}</div>
-          <div className="text-xs text-zinc-500">{testimonial.role}</div>
+          <div className="font-semibold text-white text-sm-fluid">{testimonial.author}</div>
+          <div className="text-xs text-zinc-500 font-medium">{testimonial.role}</div>
         </div>
       </div>
     </div>
@@ -115,15 +115,15 @@ export function Testimonials() {
           <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
           Testimonials
         </div>
-        <h2 className="text-4xl md:text-6xl font-medium text-white tracking-tight">
-          The proof is in the people
+        <h2 className="text-h2 font-semibold text-white tracking-tight leading-tight">
+          Trust by Jamaican shoppers.
         </h2>
       </div>
 
       <div className="relative flex flex-col gap-6">
         {/* Row 1 - Scroll Left */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-          <div 
+          <div
             className={`flex gap-4 px-4 hover:[animation-play-state:paused] ${isVisible ? "animate-scroll-left" : ""}`}
             style={{ willChange: isVisible ? "transform" : "auto" }}
           >
@@ -137,7 +137,7 @@ export function Testimonials() {
 
         {/* Row 2 - Scroll Right */}
         <div className="flex w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-          <div 
+          <div
             className={`flex gap-4 px-4 hover:[animation-play-state:paused] ${isVisible ? "animate-scroll-right" : ""}`}
             style={{ willChange: isVisible ? "transform" : "auto" }}
           >
