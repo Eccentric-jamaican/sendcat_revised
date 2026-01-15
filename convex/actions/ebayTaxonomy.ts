@@ -3,6 +3,7 @@
 import { action } from "../_generated/server";
 import { v } from "convex/values";
 import { api } from "../_generated/api";
+import { getEbayAppAccessToken } from "../lib/ebayClient";
 
 type CategoryNode = {
   category: { categoryId: string; categoryName: string };
@@ -51,31 +52,7 @@ export const refreshEbayCategories = action({
 
     // Use same public OAuth scope as Browse. If eBay requires an additional scope
     // for taxonomy, this call will return 403 and we can update scopes accordingly.
-    const clientId = process.env.EBAY_CLIENT_ID;
-    const clientSecret = process.env.EBAY_CLIENT_SECRET;
-    if (!clientId || !clientSecret) {
-      throw new Error("Missing EBAY_CLIENT_ID or EBAY_CLIENT_SECRET");
-    }
-
-    const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-    const tokenRes = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${authHeader}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        scope: "https://api.ebay.com/oauth/api_scope",
-      }),
-    });
-    if (!tokenRes.ok) {
-      const text = await tokenRes.text().catch(() => "");
-      throw new Error(`eBay OAuth failed (${tokenRes.status}): ${text}`);
-    }
-    const tokenJson = (await tokenRes.json()) as { access_token?: string };
-    const accessToken = tokenJson.access_token;
-    if (!accessToken) throw new Error("eBay OAuth returned no access_token");
+    const accessToken = await getEbayAppAccessToken();
 
     // 1) Get default category tree ID.
     const treeIdRes = await fetch(

@@ -11,6 +11,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useSearchParams } from "next/navigation";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -27,6 +28,20 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
   return outputArray;
+}
+
+function getOrCreateDeviceId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const key = "sendcat_ebay_device_id";
+    const existing = window.localStorage.getItem(key);
+    if (existing && /^[A-Za-z0-9_-]{8,}$/.test(existing)) return existing;
+    const id = crypto.randomUUID();
+    window.localStorage.setItem(key, id);
+    return id;
+  } catch {
+    return null;
+  }
 }
 
 type SearchResultItem = {
@@ -125,6 +140,7 @@ export default function AppPage() {
 
 function ExploreWithConvex() {
   const stores = STORES;
+  const { isSignedIn, user } = useUser();
   const [selectedSource, setSelectedSource] = useState<string>("ebay");
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState<SearchFilters>({
@@ -159,6 +175,7 @@ function ExploreWithConvex() {
   const searchParams = useSearchParams();
 
   const searchSource = useAction(api.actions.search.searchSource);
+  const createEbayOrder = useAction(api.actions.ebayOrder.createOrder);
   const createAgentJob = useMutation(api.mutations.agentJobs.createAgentJob);
   const upsertPushSubscription = useMutation(api.mutations.pushSubscriptions.upsertPushSubscription);
   const refreshEbayCategories = useAction(api.actions.ebayTaxonomy.refreshEbayCategories);
@@ -198,6 +215,24 @@ function ExploreWithConvex() {
     }));
   }, [results, trending]);
   const showingSearchResults = results.length > 0;
+
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [checkoutFirstName, setCheckoutFirstName] = useState("");
+  const [checkoutLastName, setCheckoutLastName] = useState("");
+  const [checkoutPhone, setCheckoutPhone] = useState("");
+  const [checkoutAddress1, setCheckoutAddress1] = useState("");
+  const [checkoutAddress2, setCheckoutAddress2] = useState("");
+  const [checkoutCity, setCheckoutCity] = useState("");
+  const [checkoutState, setCheckoutState] = useState("");
+  const [checkoutPostal, setCheckoutPostal] = useState("");
+  const [checkoutCountry, setCheckoutCountry] = useState("US");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [checkoutResult, setCheckoutResult] = useState<
+    | { checkoutSessionId: string; securitySignature?: string; pricingSummary?: { total?: { value?: string; currency?: string } } }
+    | null
+  >(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
   const job = useQuery(api.queries.agentJobs.getJob, currentJobId ? { jobId: currentJobId } : "skip");
   const messages = useQuery(api.queries.agentJobs.listThreadMessages, threadId ? { threadId } : "skip");
@@ -239,6 +274,21 @@ function ExploreWithConvex() {
         chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
   }, [messages, isAgentMode, currentJobId, job?.status]);
+
+  // Reset checkout UI when selected item changes
+  useEffect(() => {
+    if (!selectedItem) return;
+    setCheckoutOpen(false);
+    setCheckoutError(null);
+    setCheckoutResult(null);
+  }, [selectedItem]);
+
+  // Prefill email when user signs in
+  useEffect(() => {
+    if (!selectedItem) return;
+    const email = user?.primaryEmailAddress?.emailAddress;
+    if (email) setCheckoutEmail(email);
+  }, [user?.primaryEmailAddress?.emailAddress, selectedItem]);
 
 
   useEffect(() => {
@@ -1312,21 +1362,218 @@ function ExploreWithConvex() {
             </div>
 
             <div className="p-4 sm:p-6 border-t border-white/10 bg-zinc-950 shrink-0 mt-auto pb-8 sm:pb-6">
-              <Button
-                className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                onClick={() => {
-                  if (selectedItem.affiliateUrl) {
-                    window.open(
-                      `/api/out?url=${encodeURIComponent(selectedItem.affiliateUrl)}`,
-                      "_blank",
-                      "noopener,noreferrer",
-                    );
-                  }
-                }}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View on {selectedItem.source === "ebay" ? "eBay" : "Store"}
-              </Button>
+              {selectedItem.source === "ebay" ? (
+                <div className="space-y-3">
+                  <Button
+                    className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                    onClick={() => setCheckoutOpen((v) => !v)}
+                  >
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Buy & Checkout (beta)
+                  </Button>
+
+                  {checkoutOpen ? (
+                    <div className="rounded-xl border border-white/10 bg-zinc-900/40 p-3 sm:p-4 space-y-3">
+                      {!isSignedIn ? (
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs text-zinc-400">
+                            Sign in is required to start checkout.
+                          </p>
+                          <SignInButton>
+                            <Button variant="secondary" className="bg-white text-black hover:bg-zinc-200">
+                              Sign in
+                            </Button>
+                          </SignInButton>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-xs text-zinc-400">
+                            We’ll create an eBay guest checkout session. Payment happens on eBay (we never collect card
+                            details).
+                          </p>
+
+                          <div className="grid gap-2">
+                            <Input
+                              value={checkoutEmail}
+                              onChange={(e) => setCheckoutEmail(e.target.value)}
+                              placeholder="Contact email"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                            />
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              <Input
+                                value={checkoutFirstName}
+                                onChange={(e) => setCheckoutFirstName(e.target.value)}
+                                placeholder="First name"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                              />
+                              <Input
+                                value={checkoutLastName}
+                                onChange={(e) => setCheckoutLastName(e.target.value)}
+                                placeholder="Last name"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                              />
+                            </div>
+                            <Input
+                              value={checkoutPhone}
+                              onChange={(e) => setCheckoutPhone(e.target.value)}
+                              placeholder="Phone number (include country code if possible)"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                            />
+                            <Input
+                              value={checkoutAddress1}
+                              onChange={(e) => setCheckoutAddress1(e.target.value)}
+                              placeholder="Address line 1"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                            />
+                            <Input
+                              value={checkoutAddress2}
+                              onChange={(e) => setCheckoutAddress2(e.target.value)}
+                              placeholder="Address line 2 (optional)"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                            />
+                            <div className="grid gap-2 sm:grid-cols-3">
+                              <Input
+                                value={checkoutCity}
+                                onChange={(e) => setCheckoutCity(e.target.value)}
+                                placeholder="City"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                              />
+                              <Input
+                                value={checkoutState}
+                                onChange={(e) => setCheckoutState(e.target.value)}
+                                placeholder="State/Province"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                              />
+                              <Input
+                                value={checkoutPostal}
+                                onChange={(e) => setCheckoutPostal(e.target.value)}
+                                placeholder="Postal code"
+                                className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                              />
+                            </div>
+                            <Input
+                              value={checkoutCountry}
+                              onChange={(e) => setCheckoutCountry(e.target.value)}
+                              placeholder="Country (ISO2, e.g. US)"
+                              className="bg-black/20 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500 min-h-[44px]"
+                            />
+                          </div>
+
+                          <Button
+                            className="w-full h-11 bg-white text-black hover:bg-zinc-200"
+                            disabled={
+                              isCreatingCheckout ||
+                              !checkoutEmail.trim() ||
+                              !checkoutFirstName.trim() ||
+                              !checkoutLastName.trim() ||
+                              !checkoutPhone.trim() ||
+                              !checkoutAddress1.trim() ||
+                              !checkoutCity.trim() ||
+                              !checkoutCountry.trim()
+                            }
+                            onClick={async () => {
+                              if (!selectedItem) return;
+                              setCheckoutError(null);
+                              setCheckoutResult(null);
+                              setIsCreatingCheckout(true);
+                              try {
+                                const deviceId = getOrCreateDeviceId() ?? undefined;
+                                const res = await createEbayOrder({
+                                  marketplaceId: "EBAY_US",
+                                  deviceId,
+                                  contactEmail: checkoutEmail.trim(),
+                                  lineItems: [{ itemId: selectedItem.externalId, quantity: 1 }],
+                                  shippingAddress: {
+                                    addressLine1: checkoutAddress1.trim(),
+                                    addressLine2: checkoutAddress2.trim() ? checkoutAddress2.trim() : undefined,
+                                    city: checkoutCity.trim(),
+                                    stateOrProvince: checkoutState.trim() ? checkoutState.trim() : undefined,
+                                    postalCode: checkoutPostal.trim() ? checkoutPostal.trim() : undefined,
+                                    country: checkoutCountry.trim().toUpperCase(),
+                                    phoneNumber: checkoutPhone.trim(),
+                                    recipient: { firstName: checkoutFirstName.trim(), lastName: checkoutLastName.trim() },
+                                  },
+                                });
+                                setCheckoutResult(res);
+                              } catch (e: unknown) {
+                                let msg = e instanceof Error ? e.message : "Failed to start checkout";
+                                if (typeof msg === "string" && msg.includes("Access denied")) {
+                                  msg =
+                                    "eBay Order API access denied for this app. This endpoint is Limited Release—ensure your eBay app has the buy.guest.order scope enabled and your account is approved for Order API v2.";
+                                }
+                                setCheckoutError(msg);
+                              } finally {
+                                setIsCreatingCheckout(false);
+                              }
+                            }}
+                          >
+                            {isCreatingCheckout ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Creating…
+                              </>
+                            ) : (
+                              "Create checkout session"
+                            )}
+                          </Button>
+
+                          {checkoutError ? <p className="text-xs text-red-400">{checkoutError}</p> : null}
+
+                          {checkoutResult ? (
+                            <div className="rounded-lg border border-white/10 bg-black/20 p-3 text-xs">
+                              <div className="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">
+                                checkoutSessionId
+                              </div>
+                              <div className="font-mono text-indigo-300 break-all">
+                                {checkoutResult.checkoutSessionId}
+                              </div>
+                              {checkoutResult.securitySignature ? (
+                                <>
+                                  <div className="text-[10px] uppercase tracking-wide text-zinc-500 mt-3 mb-1">
+                                    X-EBAY-SECURITY-SIGNATURE
+                                  </div>
+                                  <div className="font-mono text-zinc-200 break-all">
+                                    {checkoutResult.securitySignature}
+                                  </div>
+                                </>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </>
+                      )}
+                    </div>
+                  ) : null}
+
+                  <Button
+                    variant="secondary"
+                    className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-white/10 hover:bg-white/20 text-white border-none"
+                    onClick={() => {
+                      if (selectedItem.affiliateUrl) {
+                        window.open(`/api/out?url=${encodeURIComponent(selectedItem.affiliateUrl)}`, "_blank", "noopener,noreferrer");
+                      }
+                    }}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View on eBay
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                  onClick={() => {
+                    if (selectedItem.affiliateUrl) {
+                      window.open(
+                        `/api/out?url=${encodeURIComponent(selectedItem.affiliateUrl)}`,
+                        "_blank",
+                        "noopener,noreferrer",
+                      );
+                    }
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View on {selectedItem.source === "ebay" ? "eBay" : "Store"}
+                </Button>
+              )}
             </div>
           </div>
         ) : null}
