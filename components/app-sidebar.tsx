@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   Compass,
   TrendingUp,
@@ -22,9 +22,9 @@ import {
   HelpCircle,
   Settings,
   Tag,
-} from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -58,26 +58,31 @@ const items = [
     url: "/app/settings",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const isActive = (url: string) => {
     if (url === "/app") {
-      return pathname === "/app"
+      return pathname === "/app";
     }
-    return pathname.startsWith(url)
-  }
+    return pathname.startsWith(url);
+  };
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-2 px-2">
+      <SidebarHeader className="p-2">
+        <Link
+          href="/"
+          className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center"
+        >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-black">
             <ShoppingBag className="h-5 w-5" />
           </div>
-          <span className="font-semibold text-xl text-white group-data-[collapsible=icon]:hidden">SendCat</span>
+          <span className="font-semibold text-xl text-white group-data-[collapsible=icon]:hidden">
+            SendCat
+          </span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -86,7 +91,12 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} className="h-10" tooltip={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    className="h-10"
+                    tooltip={item.title}
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -103,6 +113,5 @@ export function AppSidebar() {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
-
