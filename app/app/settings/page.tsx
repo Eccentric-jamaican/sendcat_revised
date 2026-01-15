@@ -1,15 +1,35 @@
+"use client";
+
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronDown } from "lucide-react"
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs"
 
 export default function SettingsPage() {
   const tabs = ["Basics", "Account", "Email notifications", "Memberships"]
 
   return (
     <div className="flex flex-col gap-8 p-8 max-w-4xl mx-auto w-full text-white">
-      {/* Header & Tabs */}
-      <div className="space-y-6">
+      {/* Sign-in prompt for unauthenticated users */}
+      <SignedOut>
+        <div className="rounded-xl bg-zinc-900/50 border border-white/10 p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">Sign in to manage settings</h2>
+          <p className="text-zinc-400 mb-6">
+            Access your profile, preferences, and account settings by signing in.
+          </p>
+          <SignInButton>
+            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white px-8">
+              Sign in
+            </Button>
+          </SignInButton>
+        </div>
+      </SignedOut>
+
+      {/* Existing settings content - only visible when signed in */}
+      <SignedIn>
+        {/* Header & Tabs */}
+        <div className="space-y-6">
         <h1 className="text-4xl font-bold">Settings</h1>
         <div className="flex items-center gap-8 border-b border-white/10 text-sm font-medium">
           {tabs.map((tab, i) => (
@@ -112,6 +132,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+      </SignedIn>
     </div>
   )
 }

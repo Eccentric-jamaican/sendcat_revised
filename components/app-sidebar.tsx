@@ -22,9 +22,10 @@ import {
   HelpCircle,
   Settings,
   Tag,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -32,6 +33,11 @@ const items = [
     title: "Explore",
     url: "/app",
     icon: Compass,
+  },
+  {
+    title: "AI Search",
+    url: "/app?agent=1",
+    icon: Sparkles,
   },
   {
     title: "Saved Items",
@@ -62,10 +68,16 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const isActive = (url: string) => {
+    // Handle AI Search with query parameter
+    if (url === "/app?agent=1") {
+      return pathname === "/app" && searchParams?.get("agent") === "1";
+    }
+    // Handle exact match for Explore (only when NOT in agent mode)
     if (url === "/app") {
-      return pathname === "/app";
+      return pathname === "/app" && searchParams?.get("agent") !== "1";
     }
     return pathname.startsWith(url);
   };
