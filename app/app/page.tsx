@@ -12,6 +12,7 @@ import { api } from "@/convex/_generated/api";
 import { useSearchParams } from "next/navigation";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { SignInButton, useUser } from "@clerk/nextjs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -138,6 +139,152 @@ export default function AppPage() {
   return <ExploreWithConvex />;
 }
 
+// Floating search button component (mobile-only)
+function FloatingSearchButton({
+  onClick,
+  isAgentMode
+}: {
+  onClick: () => void;
+  isAgentMode: boolean;
+}) {
+  const isMobile = useIsMobile();
+
+  // Hide in agent mode or on desktop
+  if (!isMobile || isAgentMode) return null;
+
+  return (
+    <button
+      onClick={onClick}
+      className="fixed bottom-24 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-500 transition-all active:scale-95"
+      aria-label="Open search"
+    >
+      <Search className="h-6 w-6" strokeWidth={2} />
+    </button>
+  );
+}
+
+// Search overlay modal component (mobile-only)
+function SearchOverlay({
+  isOpen,
+  onClose,
+  query,
+  setQuery,
+  onSearch,
+  isSearching,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  query: string;
+  setQuery: (value: string) => void;
+  onSearch: () => void;
+  isSearching: boolean;
+}) {
+  const isMobile = useIsMobile();
+
+  // Auto-close when switching to desktop
+  useEffect(() => {
+    if (!isMobile && isOpen) {
+      onClose();
+    }
+  }, [isMobile, isOpen, onClose]);
+
+  // Escape key to close
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
+  // Prevent background scrolling
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || !isMobile) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-label="Close search"
+      />
+
+      {/* Modal */}
+      <div className="absolute left-1/2 top-1/2 w-[min(92vw,560px)] -translate-x-1/2 -translate-y-1/2">
+        <div className="rounded-2xl border border-white/10 bg-[#0b0b0f] p-5 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Search Products</h3>
+            <button
+              type="button"
+              className="text-white hover:bg-white/10 rounded-lg h-8 w-8 flex items-center justify-center transition-colors"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Input
+              autoFocus
+              placeholder="Search products, brands, or stores"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && query.trim()) {
+                  onSearch();
+                  onClose();
+                }
+              }}
+              className="pl-10 pr-4 h-12 text-base rounded-xl border-white/10 bg-zinc-900/50 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500/50"
+            />
+          </div>
+
+          {/* Search Button */}
+          <button
+            type="button"
+            className="w-full mt-4 h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            onClick={() => {
+              if (query.trim()) {
+                onSearch();
+                onClose();
+              }
+            }}
+            disabled={isSearching || !query.trim()}
+          >
+            {isSearching ? (
+              <>
+                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Searching...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" />
+                Search
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ExploreWithConvex() {
   const stores = STORES;
   const { isSignedIn, user } = useUser();
@@ -172,6 +319,10 @@ function ExploreWithConvex() {
   const [isEnablingPush, setIsEnablingPush] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
+
+  // State for mobile search overlay
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+
   const searchParams = useSearchParams();
 
   const searchSource = useAction(api.actions.search.searchSource);
@@ -244,7 +395,8 @@ function ExploreWithConvex() {
   useEffect(() => {
     const shouldOpen = searchParams?.get("agent") === "1";
     const jobId = searchParams?.get("jobId");
-    if (shouldOpen) setIsAgentMode(true);
+
+    setIsAgentMode(shouldOpen);
 
     // Validate the jobId from the URL before casting and setting state.
     // Convex IDs are opaque strings at runtime; ensure we at least have a
@@ -257,9 +409,11 @@ function ExploreWithConvex() {
       // eslint-disable-next-line no-console
       console.warn("Invalid agent jobId in URL, ignoring:", jobId);
       setCurrentJobId(null);
+    } else {
+      setCurrentJobId(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!job) return;
@@ -443,6 +597,18 @@ function ExploreWithConvex() {
     },
     [filters, lastSearchParams, query, searchSource, selectedSource, isAgentMode, createAgentJob, threadId],
   );
+
+  // Wrapper for overlay search
+  const handleOverlaySearch = useCallback(() => {
+    void runSearch();
+  }, [runSearch]);
+
+  // Auto-close search overlay when filters open
+  useEffect(() => {
+    if (filtersOpen && isSearchOverlayOpen) {
+      setIsSearchOverlayOpen(false);
+    }
+  }, [filtersOpen, isSearchOverlayOpen]);
 
   useEffect(() => {
     // Only run initial search if NOT in agent mode
@@ -800,27 +966,19 @@ function ExploreWithConvex() {
     pageContent = (
       <div className="flex flex-col gap-8 p-8 max-w-7xl mx-auto w-full">
       {/* Search Bar */}
-      <div className="flex items-center w-full">
+      <div className="hidden md:flex items-center w-full">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <Input 
-            placeholder="Search products, brands, or stores" 
+          <Input
+            placeholder="Search products, brands, or stores"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") void runSearch();
             }}
-            className="pl-10 h-12 text-base rounded-l-xl rounded-r-none border-r-0 border-white/10 bg-zinc-900/50 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500/50"
+            className="pl-10 h-12 text-base rounded-xl border-white/10 bg-zinc-900/50 text-white placeholder:text-zinc-500 focus-visible:ring-indigo-500/50"
           />
         </div>
-        <Button
-          type="button"
-          className="h-12 rounded-l-none rounded-r-xl border border-l-0 border-white/10 bg-zinc-900/60 text-white hover:bg-zinc-800 shrink-0 px-4"
-          onClick={() => setIsAgentMode(!isAgentMode)}
-        >
-          <Bot className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">AI Chat</span>
-        </Button>
       </div>
 
       {/* Filters */}
@@ -1154,19 +1312,9 @@ function ExploreWithConvex() {
 
       {/* Trending Products */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-white">
-            {results.length ? "Results" : "Trending Products"}
-          </h2>
-          <button
-            type="button"
-            onClick={() => void runSearch()}
-            disabled={isSearching || !query.trim()}
-            className="text-sm rounded-lg px-3 py-2 bg-white/10 hover:bg-white/15 disabled:opacity-50"
-          >
-            {isSearching ? "Searching…" : "Search"}
-          </button>
-        </div>
+        <h2 className="text-lg font-semibold text-white">
+          {results.length ? "Results" : "Trending Products"}
+        </h2>
 
         {error ? <p className="text-sm text-red-400">{error}</p> : null}
         {!results.length && !trending ? (
@@ -1585,6 +1733,22 @@ function ExploreWithConvex() {
     <>
       {pageContent}
       {productDetailSheet}
+
+      {/* Floating search button */}
+      <FloatingSearchButton
+        onClick={() => setIsSearchOverlayOpen(true)}
+        isAgentMode={isAgentMode}
+      />
+
+      {/* Search overlay modal */}
+      <SearchOverlay
+        isOpen={isSearchOverlayOpen}
+        onClose={() => setIsSearchOverlayOpen(false)}
+        query={query}
+        setQuery={setQuery}
+        onSearch={handleOverlaySearch}
+        isSearching={isSearching}
+      />
     </>
   );
 }
