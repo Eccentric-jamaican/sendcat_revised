@@ -760,7 +760,7 @@ function ExploreWithConvex() {
         </div>
 
         {/* Input Area (Floating Bottom) */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 px-3 md:px-6 z-20 pointer-events-none">
+        <div className="absolute bottom-20 md:bottom-6 left-0 right-0 px-3 md:px-6 z-20 pointer-events-none">
             <div className="max-w-3xl mx-auto relative pointer-events-auto">
                 <div className="relative group shadow-2xl rounded-full">
                     {/* Optional glow effect */}
