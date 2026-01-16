@@ -4,7 +4,7 @@ import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronDown } from "lucide-react"
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs"
+import { SignedIn, SignedOut, SignInButton, SignOutButton } from "@clerk/nextjs"
 
 export default function SettingsPage() {
   const tabs = ["Basics", "Account", "Email notifications", "Memberships"]
@@ -130,10 +130,18 @@ export default function SettingsPage() {
               Save
             </Button>
           </div>
+
+          <div className="border-t border-white/10 pt-6">
+            <h3 className="text-sm font-semibold text-zinc-200 mb-3">Account actions</h3>
+            <SignOutButton>
+              <Button className="w-full sm:w-auto bg-red-500/20 text-red-200 hover:bg-red-500/30 border border-red-500/40 rounded-full px-6 font-medium h-10">
+                Sign out
+              </Button>
+            </SignOutButton>
+          </div>
         </div>
       </div>
       </SignedIn>
     </div>
   )
 }
-
